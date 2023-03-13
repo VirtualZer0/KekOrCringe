@@ -11,10 +11,7 @@
       :queue="Object.values(videoList)"
       :currentPlaying="currentVote.videoId ?? ''"
       @remove="removeVideoFromList($event)"
-      @clear="
-        videoList = {};
-        setActiveVideo(null);
-      "
+      @clear="clearQueue()"
     />
     <div class="content">
       <div class="left-menu">
@@ -84,6 +81,7 @@
         </div>
       </div>
       <RateBlock
+        :isActive="currentVote.isActive"
         @init="setVariantRefs"
         @vote="addVote($event, 'me')"
       />
@@ -141,10 +139,7 @@ const currentVote = ref<{
   isActive: boolean;
 }>({
   videoId: null,
-  votes: {
-    kek: ['f', 'd'],
-    cringe: ['d'],
-  },
+  votes: {},
   skipCount: 0,
   voteCount: 0,
   isActive: false,
@@ -331,7 +326,7 @@ const addVideoToList = (video: IVideoData) => {
 /** Launch  selected video or stop current if videoId is null */
 const setActiveVideo = (videoId: string | null) => {
   currentVote.value.videoId = videoId;
-  currentVote.value.isActive = true;
+  currentVote.value.isActive = videoId ? true : false;
   currentVote.value.voteCount = 0;
   currentVote.value.skipCount = store.videoSettings.skipCount;
   Object.keys(currentVote.value.votes).forEach(
@@ -389,6 +384,12 @@ const launchResult = () => {
       setActiveVideo(null);
     }
   }, 3700);
+};
+
+const clearQueue = () => {
+  videoList.value = {};
+  localStorage['videoList'] = JSON.stringify(videoList.value);
+  setActiveVideo(null);
 };
 
 /** Remove selected video from queue */

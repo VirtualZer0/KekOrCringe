@@ -1,5 +1,8 @@
 <template>
-  <div class="rate-block">
+  <div
+    class="rate-block"
+    :class="{ inactive: !props.isActive }"
+  >
     <Button
       class="rate-variant"
       :ref="(el) => (variantRefs['kek'] = el)"
@@ -29,7 +32,7 @@
         backgroundColor: variant.color,
         borderColor: variant.color,
         color: getCorrectFgColor(variant.color),
-        paddingLeft: variantEmote['kek'] ? '74px' : '32px',
+        paddingLeft: variantEmote[variant.name] ? '74px' : '32px',
       }"
       @click="emits('vote', variant.name)"
     >
@@ -47,7 +50,7 @@
       :style="{
         backgroundColor: '#e76f51',
         borderColor: '#e76f51',
-        paddingLeft: variantEmote['kek'] ? '74px' : '32px',
+        paddingLeft: variantEmote['cringe'] ? '74px' : '32px',
       }"
       @click="emits('vote', 'cringe')"
     >
@@ -67,6 +70,13 @@ import { getCorrectFgColor } from '@/utils/getCorrectFgColor';
 import { useStore } from '@/store';
 
 import Button from 'primevue/button';
+
+const props = defineProps({
+  isActive: {
+    type: Boolean,
+    default: false,
+  },
+});
 
 const store = useStore();
 let variantRefs: Record<string, any> = {};
@@ -129,6 +139,11 @@ onUpdated(() => emits('init', variantRefs));
     &:focus {
       box-shadow: none;
     }
+  }
+
+  &.inactive {
+    pointer-events: none;
+    opacity: 0.5;
   }
 }
 </style>
