@@ -349,6 +349,8 @@ const launchResult = () => {
       .some((pair) => pair[1].length > currentVote.value.votes['cringe'].length)
   ) {
     winner = 'neutral';
+  } else if (currentVote.value.skipCount <= 0) {
+    winner = 'cringe';
   } else {
     winner = Object.entries(currentVote.value.votes).sort((a, b) => {
       return b[1].length - a[1].length;
