@@ -6,7 +6,7 @@
       :style="{
         backgroundColor: '#2a9d8f',
         borderColor: '#2a9d8f',
-        paddingLeft: variantEmote['kek'] ? '74px' : 'unset',
+        paddingLeft: variantEmote['kek'] ? '74px' : '32px',
       }"
       @click="emits('vote', 'kek')"
     >
@@ -29,7 +29,7 @@
         backgroundColor: variant.color,
         borderColor: variant.color,
         color: getCorrectFgColor(variant.color),
-        paddingLeft: variantEmote['kek'] ? '74px' : 'unset',
+        paddingLeft: variantEmote['kek'] ? '74px' : '32px',
       }"
       @click="emits('vote', variant.name)"
     >
@@ -47,7 +47,7 @@
       :style="{
         backgroundColor: '#e76f51',
         borderColor: '#e76f51',
-        paddingLeft: variantEmote['kek'] ? '74px' : 'unset',
+        paddingLeft: variantEmote['kek'] ? '74px' : '32px',
       }"
       @click="emits('vote', 'cringe')"
     >
