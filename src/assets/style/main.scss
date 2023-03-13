@@ -1,0 +1,105 @@
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: var(--fg);
+  overflow: overlay;
+}
+
+* {
+  &::-webkit-scrollbar {
+    width: 8px;
+    background-color: rgba(00, 00, 0, 0.3);
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #14B8A6;
+    border-radius: 20px;
+  }
+}
+
+.p-divider {
+  height: 1px;
+  background: var(--surface-300);
+}
+
+.p-sidebar-header {
+  position: fixed;
+  right: 0;
+  top: 0;
+  z-index: 10;
+}
+
+.p-sidebar-content {
+  margin-top: 4px;
+}
+
+h1 {
+  margin: 0;
+  padding-top: 32px;
+  margin-bottom: 32px;
+  text-align: center;
+  font-size: 48px;
+  font-weight: bold;
+  text-shadow: 1px 1px 1px #919191, 1px 2px 1px #919191, 1px 3px 1px #919191,
+    1px 4px 1px #919191, 1px 5px 1px #919191, 1px 6px 1px #919191,
+    1px 7px 1px #919191;
+  font-family: 'Courier New', Courier, monospace;
+  user-select: none;
+}
+
+.page {
+  .content {
+    position: relative;
+    z-index: 1;
+  }
+}
+
+.fadeout-el {
+  animation: fadeout-element 1s ease forwards;
+  position: absolute;
+  z-index: -1;
+  top: 42px;
+  font-size: 42px;
+  border-radius: 100%;
+}
+
+.text-s {
+
+}
+
+.text-l {
+  font-size: 1.4vw;
+}
+
+.text-xxl {
+  font-size: 5vw;
+}
+
+@keyframes page-appear {
+  0% {
+    opacity: 0;
+    transform: scale(0.5);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fadeout-element {
+  0% {
+    transform: translateY(-50%) translateX(-50%);
+    opacity: 1;
+  }
+
+  30% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(-260px) translateX(-50%);
+    opacity: 0;
+  }
+}

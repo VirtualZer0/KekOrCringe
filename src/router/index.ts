@@ -1,20 +1,32 @@
-import { createRouter, createWebHashHistory, RouteRecordRaw } from "vue-router";
-import HomeView from "../views/HomeView.vue";
+import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
+import MainPage from '../pages/MainPage.vue';
+import SettingsPage from '../pages/SettingsPage.vue';
+import RunPage from '../pages/RunPage.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
-    path: "/",
-    name: "home",
-    component: HomeView,
+    path: '/',
+    name: 'Main',
+    component: MainPage,
+    meta: {
+      color: '#E76F51',
+    },
   },
   {
-    path: "/about",
-    name: "about",
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: () =>
-      import(/* webpackChunkName: "about" */ "../views/AboutView.vue"),
+    path: '/settings',
+    name: 'Settings',
+    component: SettingsPage,
+    meta: {
+      color: '#264653',
+    },
+  },
+  {
+    path: '/run',
+    name: 'Run',
+    component: RunPage,
+    meta: {
+      color: '#E9C46A',
+    },
   },
 ];
 
