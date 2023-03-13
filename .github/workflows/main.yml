@@ -12,3 +12,4 @@ jobs:
         username: 'VirtualZer0'
         reponame: 'KekOrCringe'
         token: ${{ secrets.GITHUB_TOKEN }} # Leave this line unchanged
+        branch: 'gh-pages'
