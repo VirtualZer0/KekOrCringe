@@ -374,10 +374,10 @@ const launchResult = () => {
   }
 
   result.value.show = true;
-  removeVideoFromList(currentVote.value.videoId ?? '');
 
   setTimeout(() => {
     result.value.show = false;
+    removeVideoFromList(currentVote.value.videoId ?? '');
     if (Object.keys(videoList.value).length > 0) {
       setActiveVideo(Object.values(videoList.value)[0].id);
     } else {
