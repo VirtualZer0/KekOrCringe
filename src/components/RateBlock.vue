@@ -20,6 +20,7 @@
         height="42"
       />
       {{ $t('kek') }}
+      <div class="count">{{ votes['kek']?.length }}</div>
     </Button>
     <Button
       class="rate-variant"
@@ -43,6 +44,7 @@
         height="42"
       />
       {{ variant.name }}
+      <div class="count">{{ votes[variant.name]?.length }}</div>
     </Button>
     <Button
       class="rate-variant"
@@ -61,6 +63,7 @@
         height="42"
       />
       {{ $t('cringe') }}
+      <div class="count">{{ votes['cringe']?.length }}</div>
     </Button>
   </div>
 </template>
@@ -75,6 +78,10 @@ const props = defineProps({
   isActive: {
     type: Boolean,
     default: false,
+  },
+  votes: {
+    type: Object,
+    default: () => ({}),
   },
 });
 
@@ -103,7 +110,7 @@ onUpdated(() => emits('init', variantRefs));
 .rate-block {
   position: fixed;
   width: 100vw;
-  bottom: 64px;
+  bottom: 12px;
   display: flex;
   justify-content: center;
   gap: 4vw;
@@ -130,6 +137,23 @@ onUpdated(() => emits('init', variantRefs));
       position: absolute;
       left: 8px;
       border-radius: 100%;
+    }
+
+    .count {
+      position: absolute;
+      right: -7px;
+      top: -7px;
+      min-width: 32px;
+      height: 32px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 19px;
+      font-weight: normal;
+      text-shadow: none;
+      background: var(--c1);
+      padding: 4px;
+      border-radius: 16px;
     }
 
     &:hover {

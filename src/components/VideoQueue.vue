@@ -3,7 +3,7 @@
     class="queue-sidebar"
     :visible="props.visible"
     @update:visible="emits('close')"
-    :style="{ width: '25vw' }"
+    :style="{ width: '25vw', minWidth: '460px' }"
   >
     <h2>{{ $t('videoQueue') }}</h2>
     <div class="queue-list">

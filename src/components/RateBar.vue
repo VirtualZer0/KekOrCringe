@@ -1,5 +1,8 @@
 <template>
-  <div class="ratebar">
+  <div
+    class="ratebar"
+    :style="{ width: `${props.width}px` }"
+  >
     <div
       class="ratebar-item"
       :style="{
@@ -54,6 +57,10 @@ const props = defineProps({
     type: Number,
     default: 0,
   },
+  width: {
+    type: Number,
+    default: 58,
+  },
 });
 
 const variantColor = computed(() => {
@@ -66,7 +73,6 @@ const variantColor = computed(() => {
 </script>
 <style lang="scss" scoped>
 .ratebar {
-  width: 58vw;
   display: flex;
   position: absolute;
   bottom: -32px;

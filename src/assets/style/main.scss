@@ -49,6 +49,9 @@ h1 {
 }
 
 .page {
+  min-width: 1120px;
+  min-height: 680px;
+
   .content {
     position: relative;
     z-index: 1;
@@ -62,6 +65,15 @@ h1 {
   top: 42px;
   font-size: 42px;
   border-radius: 100%;
+}
+
+.queue-badge {
+  min-height: 18px;
+  width: 18px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .text-s {

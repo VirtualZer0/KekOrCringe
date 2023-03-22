@@ -47,7 +47,7 @@ router.beforeEach((to, from, next) => {
   });
 });
 
-router.afterEach((to, from) => {
+router.afterEach((to) => {
   if (to.name == 'Main') return;
   outAnim.value.isTop = false;
   inAnim.value.enable = true;

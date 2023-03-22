@@ -19,7 +19,7 @@ import { useStore } from './store';
 import { createPinia } from 'pinia';
 
 const i18n = createI18n({
-  locale: navigator.language,
+  locale: localStorage['lang'] ?? navigator.language,
   fallbackLocale: 'en',
   messages: locales,
   legacy: false,

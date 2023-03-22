@@ -19,6 +19,8 @@
           icon="pi pi-images"
           :label="$t('queue')"
           @click="showQueue = true"
+          :badge="Object.keys(videoList).length.toString()"
+          badgeClass="queue-badge"
         />
         <Button
           icon="pi pi-power-off"
@@ -30,6 +32,10 @@
       <div
         class="title"
         v-if="currentVote.videoId"
+        :style="{
+          width: `${playerSizeW}vmax`,
+          maxWidth: `${playerSizeW}vmax`,
+        }"
       >
         {{ videoList[currentVote.videoId as string]?.title }}
       </div>
@@ -39,7 +45,15 @@
           marginTop: currentVote.videoId ? 0 : '38px',
         }"
       >
-        <div class="video-container">
+        <div
+          class="video-container"
+          :style="{
+            width: `${playerSizeW}vmax`,
+            height: `${playerSizeH}vmax`,
+            maxWidth: `${playerSizeW}vmax`,
+            maxHeight: `${playerSizeH}vmax`,
+          }"
+        >
           <div
             class="launch-block"
             v-if="!currentVote.videoId"
@@ -62,6 +76,7 @@
             v-if="currentVote.videoId"
             :votes="currentVote.votes"
             :voteCount="currentVote.voteCount"
+            :width="playerSize.width"
           />
           <div
             class="next-container"
@@ -81,6 +96,7 @@
         </div>
       </div>
       <RateBlock
+        :votes="currentVote.votes"
         :isActive="currentVote.isActive"
         @init="setVariantRefs"
         @vote="addVote($event, 'me')"
@@ -100,7 +116,7 @@ import {
 import YouTube from 'vue3-youtube';
 import Button from 'primevue/button';
 import VideoResult from '@/components/VideoResult.vue';
-import { nextTick, onBeforeUnmount, onBeforeUpdate, onMounted, ref } from 'vue';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import { getStatistics } from '@/utils/statisticsUtils';
 import { useStore } from '@/store';
@@ -122,6 +138,8 @@ const { t } = useI18n();
 
 const showQueue = ref(false);
 let variantRefs: Record<string, any> = {};
+const playerSizeW = 70;
+const playerSizeH = playerSizeW / 1.7777777;
 const playerSize = ref({ width: 0, height: 0 });
 const ytPlayer = ref<any>();
 
@@ -182,6 +200,7 @@ const showErrToast = (msg: string) => {
 };
 
 const addVote = (variant: string, user: string) => {
+  if (!currentVote.value.isActive) return;
   const varParams = store.variantsSettings.find((v) => v.name == variant);
   const emotes = varParams?.words.filter((w) => w.url);
 
@@ -411,8 +430,14 @@ const removeVideoFromList = (videoId: string) => {
 /** Set correct size for video player */
 const resizePlayer = () => {
   playerSize.value = {
-    width: window.innerWidth * 0.58 < 720 ? 720 : window.innerWidth * 0.58,
-    height: window.innerWidth * 0.3265 < 480 ? 480 : window.innerWidth * 0.3265,
+    width:
+      (window.innerWidth * playerSizeW) / 100 < 720
+        ? 720
+        : window.innerWidth * (playerSizeW / 100),
+    height:
+      (window.innerWidth * playerSizeH) / 100 < 480
+        ? 480
+        : window.innerWidth * (playerSizeH / 100),
   };
 
   if (ytPlayer.value?.$el?.children[0]?.style?.width) {
@@ -499,8 +524,6 @@ onBeforeUnmount(() => {
     text-align: center;
     background: var(--c1);
     border-radius: 12px 12px 0 0;
-    width: 58vw;
-    max-width: 58vw;
     min-width: 720px;
     height: 38px;
     font-size: 24px;
@@ -513,8 +536,6 @@ onBeforeUnmount(() => {
   .video-container {
     position: relative;
     transition: margin-top 0.3s ease-in;
-    width: 58vmax;
-    height: 32.65vmax;
     min-width: 720px;
     min-height: 480px;
     display: flex;

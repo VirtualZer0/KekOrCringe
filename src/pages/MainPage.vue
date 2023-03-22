@@ -12,13 +12,14 @@
       <div class="pi pi-github" />
       {{ $t('createdBy') }}
     </a>
+    <LangSwitcher class="lang" />
   </section>
 </template>
 
 <script setup lang="ts">
+import LangSwitcher from '@/components/LangSwitcher.vue';
 import Logo from '@/components/Logo.vue';
 import Start from '@/components/Start.vue';
-import { ref } from 'vue';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
@@ -54,6 +55,12 @@ const router = useRouter();
     .pi {
       font-size: 32px;
     }
+  }
+
+  .lang {
+    position: absolute;
+    left: 32px;
+    bottom: 32px;
   }
 }
 </style>
