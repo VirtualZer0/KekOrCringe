@@ -138,7 +138,7 @@ const { t } = useI18n();
 
 const showQueue = ref(false);
 let variantRefs: Record<string, any> = {};
-const playerSizeW = 70;
+const playerSizeW = 68;
 const playerSizeH = playerSizeW / 1.7777777;
 const playerSize = ref({ width: 0, height: 0 });
 const ytPlayer = ref<any>();
