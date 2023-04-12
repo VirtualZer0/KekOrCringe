@@ -150,6 +150,10 @@ const triggerVariants = computed(() => {
       label: '7TV',
       items: store.emotesCache.stv,
     },
+    {
+      label: 'FFZ',
+      items: store.emotesCache.ffz,
+    },
   ];
   return triggers;
 });

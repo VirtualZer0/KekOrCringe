@@ -450,7 +450,6 @@ const resizePlayer = () => {
 
 // Chat events
 const tryUseBits = async (user: string, msg: string, bits: number) => {
-  console.log(msg, bits);
   if (
     store.videoSettings.addVideoMethod == 'bits' &&
     store.videoSettings.bitsCount <= bits

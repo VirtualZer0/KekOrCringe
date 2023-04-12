@@ -110,6 +110,27 @@ const loadStvEmotes = async () => {
   }
 };
 
+const loadFfzEmotes = async () => {
+  const result = await (
+    await fetch(`https://api.frankerfacez.com/v1/room/id/${store.twitchId}`)
+  ).json();
+
+  const emotes: any[] = [];
+  if (result.sets && Object.values(result.sets).length > 0) {
+    Object.values(result.sets).forEach((emoteSet: any) => {
+      emotes.push(...emoteSet.emoticons);
+    });
+  }
+
+  store.setEmotes({
+    name: 'ffz',
+    value: emotes.map((emote) => ({
+      name: emote.name.toLowerCase(),
+      url: emote.urls[2],
+    })),
+  });
+};
+
 const saveSettings = () => {
   store.setVideoSettings(videoSettings as any);
   store.setVariantsSettings(variantsSettings as any);
@@ -119,7 +140,7 @@ const saveSettings = () => {
 onMounted(async () => {
   await loadBasicData();
   if (store.twitchId) {
-    await Promise.all([loadBttvEmotes(), loadStvEmotes()]);
+    await Promise.all([loadBttvEmotes(), loadStvEmotes(), loadFfzEmotes()]);
     store.save();
   }
 });
