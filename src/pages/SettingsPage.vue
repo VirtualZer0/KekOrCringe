@@ -134,6 +134,7 @@ onMounted(async () => {
 
   .settings-container {
     width: 50vw;
+    min-width: 800px;
     margin: 0 auto;
     margin-bottom: 32px;
   }

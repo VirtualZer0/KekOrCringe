@@ -51,6 +51,7 @@ router.afterEach((to) => {
   if (to.name == 'Main') return;
   outAnim.value.isTop = false;
   inAnim.value.enable = true;
+  document.body.style.backgroundColor = to.meta.color as string;
 
   nextTick(() => {
     setTimeout(() => {

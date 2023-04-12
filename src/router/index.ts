@@ -2,6 +2,7 @@ import { createRouter, createWebHashHistory, RouteRecordRaw } from 'vue-router';
 import MainPage from '../pages/MainPage.vue';
 import SettingsPage from '../pages/SettingsPage.vue';
 import RunPage from '../pages/RunPage.vue';
+import EndPage from '@/pages/EndPage.vue';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -26,6 +27,14 @@ const routes: Array<RouteRecordRaw> = [
     component: RunPage,
     meta: {
       color: '#E9C46A',
+    },
+  },
+  {
+    path: '/end',
+    name: 'End',
+    component: EndPage,
+    meta: {
+      color: '#264653',
     },
   },
 ];

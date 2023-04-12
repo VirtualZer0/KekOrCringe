@@ -26,7 +26,7 @@
           icon="pi pi-power-off"
           severity="danger"
           :label="$t('end')"
-          @click="router.push('/')"
+          @click="router.push('/end')"
         />
       </div>
       <div
@@ -171,7 +171,6 @@ const recalcStatistics = (winner: 'cringe' | 'kek') => {
     const percent =
       (currentVote.value.votes[winner].length / currentVote.value.voteCount) *
       100;
-
     if (
       statistics.value[statType][`most${capitalizedWinner}Video`] == null ||
       statistics.value[statType][`most${capitalizedWinner}Video`].percent >
@@ -188,6 +187,8 @@ const recalcStatistics = (winner: 'cringe' | 'kek') => {
       };
     }
   });
+
+  localStorage['statistics'] = JSON.stringify(statistics.value);
 };
 
 const showErrToast = (msg: string) => {

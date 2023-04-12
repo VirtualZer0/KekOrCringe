@@ -65,4 +65,12 @@ export default {
   winnerIs: "Today's winner is",
   noOne: 'nobody',
   createdBy: 'Created by VirtualZer0',
+  repeat: 'Again',
+  home: 'Home',
+  mostKek: 'Most KEK',
+  mostCringe: 'Most CRINGE',
+  today: 'Today',
+  allTime: 'All time',
+  statistics: 'Statistics',
+  noData: 'No data',
 };

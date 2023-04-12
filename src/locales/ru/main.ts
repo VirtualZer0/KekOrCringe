@@ -65,4 +65,12 @@ export default {
   winnerIs: 'Сегодня победил',
   noOne: 'никто',
   createdBy: 'Создано VirtualZer0',
+  repeat: 'Повторить',
+  home: 'На главную',
+  mostKek: 'Топ КЕКА',
+  mostCringe: 'Топ КРИНЖА',
+  today: 'Сегодня',
+  allTime: 'Все время',
+  statistics: 'Статистика',
+  noData: 'Нет данных',
 };

@@ -1,7 +1,7 @@
 <template>
   <div
     class="circle-anim"
-    :style="{ zIndex: isTop ? 10000 : 0 }"
+    :style="{ zIndex: isTop ? 10000 : 2 }"
   >
     <div
       class="circle"
