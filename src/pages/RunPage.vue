@@ -146,7 +146,7 @@ const ytPlayer = ref<any>();
 const result = ref({
   show: false,
   rate: 'cringe',
-  strong: true,
+  strong: false,
 });
 
 const currentVote = ref<{
@@ -356,6 +356,7 @@ const setActiveVideo = (videoId: string | null) => {
 
 /** Launch final rate animation */
 const launchResult = () => {
+  currentVote.value.isActive = false;
   statistics.value.allTime.allVideos++;
   statistics.value.current.allVideos++;
 
@@ -390,9 +391,9 @@ const launchResult = () => {
           currentVote.value.votes['cringe'].length == 0))
     ) {
       result.value.strong = true;
+    } else {
+      result.value.strong = false;
     }
-  } else {
-    result.value.strong = false;
   }
 
   result.value.show = true;
