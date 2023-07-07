@@ -148,7 +148,7 @@ onMounted(async () => {
 
 <style lang="scss" scoped>
 .settings-page {
-  width: 100vw;
+  width: calc(100vw - 8px);
   min-height: 100vh;
   padding-bottom: 100px;
   background: #264653;

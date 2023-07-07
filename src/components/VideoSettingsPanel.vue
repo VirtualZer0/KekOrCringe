@@ -114,7 +114,10 @@
       />
       <label for="banwordsFilter">{{ $t('settings.banwordsFilter') }}</label>
     </div>
-    <div class="row">
+    <div
+      class="row"
+      v-if="false"
+    >
       <Checkbox
         :binary="true"
         inputId="autoSwitch"

@@ -40,7 +40,11 @@ const variant: any = store.variantsSettings.find((v) => v.name == props.result);
 const getColor = () => (props.result == 'neutral' ? '#93a8ac' : variant.color);
 const getText = () => {
   if (['cringe', 'neutral', 'kek'].includes(props.result)) {
-    return t(`${props.strong ? 'very' : ''}${props.result}`).toUpperCase();
+    return t(
+      `${props.strong && props.result != 'neutral' ? 'very' : ''}${
+        props.result
+      }`
+    ).toUpperCase();
   } else {
     return variant.name.toUpperCase();
   }
