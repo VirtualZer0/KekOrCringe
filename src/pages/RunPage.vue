@@ -391,7 +391,9 @@ const launchResult = () => {
         .filter((pair) => pair[0] != 'kek' && pair[0] != 'cringe')
         .some((pair) => pair[1].length > 0) &&
       (currentVote.value.votes['kek'].length == 0 ||
-        currentVote.value.votes['cringe'].length == 0)
+        currentVote.value.votes['cringe'].length == 0) &&
+      currentVote.value.votes['kek'].length !=
+        currentVote.value.votes['cringe'].length
     ) {
       result.value.strong = true;
     } else {
