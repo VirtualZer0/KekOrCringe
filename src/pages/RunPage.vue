@@ -387,11 +387,11 @@ const launchResult = () => {
     recalcStatistics(winner);
 
     if (
-      currentVote.value.skipCount >= store.videoSettings.skipCount ||
-      (currentVote.value.votes['kek'].length !=
-        currentVote.value.votes['cringe'].length &&
-        (currentVote.value.votes['kek'].length == 0 ||
-          currentVote.value.votes['cringe'].length == 0))
+      !Object.entries(currentVote.value.votes)
+        .filter((pair) => pair[0] != 'kek' && pair[0] != 'cringe')
+        .some((pair) => pair[1].length > 0) &&
+      (currentVote.value.votes['kek'].length == 0 ||
+        currentVote.value.votes['cringe'].length == 0)
     ) {
       result.value.strong = true;
     } else {
