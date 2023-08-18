@@ -118,7 +118,7 @@ import Button from 'primevue/button';
 import VideoResult from '@/components/VideoResult.vue';
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { getStatistics } from '@/utils/statisticsUtils';
+import { createEmptyStatBlock, getStatistics } from '@/utils/statisticsUtils';
 import { useStore } from '@/store';
 import { spawnFadeout } from '@/utils/spawnFadeout';
 import { getRandItem } from '@/utils/getRandItem';
@@ -168,6 +168,7 @@ const setVariantRefs = (vRefs: Record<string, any>) => (variantRefs = vRefs);
 const recalcStatistics = (winner: 'cringe' | 'kek') => {
   ['current', 'allTime'].forEach((statType) => {
     const capitalizedWinner = winner.charAt(0).toUpperCase() + winner.slice(1);
+    statistics.value[statType][`all${capitalizedWinner}Count`]++;
     const percent =
       (currentVote.value.votes[winner].length / currentVote.value.voteCount) *
       100;
@@ -265,6 +266,8 @@ if (localStorage.getItem('videoList')) {
 }
 
 const statistics = ref(getStatistics());
+statistics.value.current = createEmptyStatBlock();
+localStorage['statistics'] = JSON.stringify(statistics.value);
 
 const users = ref<Record<string, TUserData>>({});
 if (localStorage.getItem('users')) {

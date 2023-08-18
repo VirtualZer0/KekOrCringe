@@ -73,4 +73,10 @@ export default {
   allTime: 'Все время',
   statistics: 'Статистика',
   noData: 'Нет данных',
+  kekWinnerTitle: 'Сегодня вы порадовали нас кучей',
+  cringeWinnerTitle: 'Сегодня вы  навалили тонну',
+  nothingWinnerTitle: 'Кек или Кринж? А может лучше...',
+  kekWinnerName: 'КЕКОВ',
+  cringeWinnerName: 'КРИНЖА',
+  nothingWinnerName: 'НИЧЬЯ',
 };

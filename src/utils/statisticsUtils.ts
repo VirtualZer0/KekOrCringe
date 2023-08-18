@@ -1,4 +1,4 @@
-const createEmptyStatBlock = () => ({
+export const createEmptyStatBlock = () => ({
   mostCringeVideo: null,
   mostKekVideo: null,
   mostCringeUser: null,
@@ -18,20 +18,10 @@ export const getStatistics = (clearCurrent = true) => {
   } else {
     const statistics = {
       allTime: {
-        mostCringeVideo: null,
-        mostKekVideo: null,
-        allCringeCount: 0,
-        allKekCount: 0,
-        allVideos: 0,
+        ...createEmptyStatBlock(),
       },
       current: {
-        mostCringeVideo: null,
-        mostKekVideo: null,
-        mostCringeUser: null,
-        mostKekUser: null,
-        allCringeCount: 0,
-        allKekCount: 0,
-        allVideos: 0,
+        ...createEmptyStatBlock(),
       },
     };
 

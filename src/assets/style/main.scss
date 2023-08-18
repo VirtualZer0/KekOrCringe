@@ -3,7 +3,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: var(--fg);
-  overflow: overlay;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
 }
 
 * {
@@ -51,6 +52,7 @@ h1 {
 .page {
   min-width: 1120px;
   min-height: 680px;
+  max-width: calc(100vw - 8px);
 
   .content {
     position: relative;
@@ -112,6 +114,30 @@ h1 {
 
   100% {
     transform: translateY(-260px) translateX(-50%);
+    opacity: 0;
+  }
+}
+
+.particle {
+  position: absolute;
+  will-change: transform;
+  animation: fadeUp ease forwards;
+  font-size: 42px;
+  z-index: 0;
+}
+
+@keyframes fadeUp {
+  0% {
+    transform: translateY(0px);
+    opacity: 0;
+  }
+
+  5% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(-150px);
     opacity: 0;
   }
 }

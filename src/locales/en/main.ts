@@ -73,4 +73,10 @@ export default {
   allTime: 'All time',
   statistics: 'Statistics',
   noData: 'No data',
+  kekWinnerTitle: 'Today was a day full of',
+  cringeWinnerTitle: 'You piled up a ton of',
+  nothingWinnerTitle: 'Kek or Kringe? Or maybe better yet...',
+  kekWinnerName: 'KEKES',
+  cringeWinnerName: 'CRINGE',
+  nothingWinnerName: 'DRAW',
 };

@@ -2,6 +2,25 @@
   <section class="end-page page">
     <h1>{{ $t('statistics') }}</h1>
 
+    <div
+      class="winner"
+      :class="winner"
+      ref="winnerContainer"
+    >
+      <span class="title">{{ $t(`${winner}WinnerTitle`) }}</span>
+      <span
+        class="name"
+        :class="winner"
+      >
+        {{ $t(`${winner}WinnerName`) }}
+      </span>
+      <div class="counter">
+        <b class="red">{{ statistics.current.allCringeCount }}</b>
+        vs
+        <b class="green">{{ statistics.current.allKekCount }}</b>
+      </div>
+    </div>
+
     <div class="stat-block kek">
       <div class="title">{{ $t('mostKek') }}</div>
       <div class="item">
@@ -40,7 +59,7 @@
         <h2 class="item-title">{{ $t('allTime') }}</h2>
         <div
           class="item-video"
-          v-if="statistics.current.mostKekVideo"
+          v-if="statistics.allTime.mostKekVideo"
         >
           <div class="preview-container">
             <div class="stats">
@@ -107,7 +126,7 @@
         <h2 class="item-title">{{ $t('allTime') }}</h2>
         <div
           class="item-video"
-          v-if="statistics.current.mostCringeVideo"
+          v-if="statistics.allTime.mostCringeVideo"
         >
           <div class="preview-container">
             <div class="stats">
@@ -156,9 +175,50 @@
 import Button from 'primevue/button';
 import { getStatistics } from '@/utils/statisticsUtils';
 import { useRouter } from 'vue-router';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
+import { spawnRandomParticle } from '@/utils/spawnParticle';
+import { getRandItem } from '@/utils/getRandItem';
 
 const statistics = getStatistics(false);
 const router = useRouter();
+
+const score =
+  statistics.current.allKekCount - statistics.current.allCringeCount;
+const winner = ref('kek');
+const winnerContainer = ref<HTMLElement>();
+const emojis = {
+  kek: ['😸', '🤩', '😁', '🤣', '✨', '🌸', '❤️'],
+  cringe: ['💔', '💢', '🚽', '👎', '😡', '😭', '💩'],
+  nothing: ['😶', '🤔', '😒', '👀', '💫', '☁️', '🌌'],
+};
+
+if (score > 0) {
+  winner.value = 'kek';
+} else if (score < 0) {
+  winner.value = 'cringe';
+} else {
+  winner.value = 'nothing';
+}
+
+let timer: number | null = null;
+
+onMounted(() => {
+  if (winnerContainer.value !== undefined) {
+    setTimeout(() => {
+      timer = setInterval(() => {
+        spawnRandomParticle(
+          [winner.value],
+          winnerContainer.value as any,
+          2
+        ).innerText = getRandItem(
+          emojis[winner.value as 'kek' | 'cringe' | 'nothing']
+        );
+      }, 300);
+    }, 600);
+  }
+});
+
+onBeforeUnmount(() => clearInterval(timer as number));
 </script>
 <style lang="scss" scoped>
 .end-page {
@@ -166,6 +226,73 @@ const router = useRouter();
   width: 100vw;
   background: var(--c1);
   padding-bottom: 32px;
+
+  .winner {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    flex-direction: column;
+    margin: 0 auto;
+    margin-bottom: 64px;
+    margin-top: 64px;
+    padding-bottom: 12px;
+    padding-top: 12px;
+    font-size: 21px;
+    width: 65%;
+    border-top: 2px solid #fff;
+    border-bottom: 2px solid #fff;
+    animation: winner-appear 0.7s ease backwards;
+    animation-delay: 0.3s;
+
+    .title,
+    .name,
+    .counter {
+      z-index: 1;
+    }
+
+    &.kek {
+      border-color: var(--c2);
+    }
+
+    &.cringe {
+      border-color: var(--c5);
+    }
+
+    &.nothing {
+      border-color: var(--c3);
+    }
+
+    .name {
+      &.kek,
+      &.nothing,
+      &.cringe {
+        font-weight: bold;
+        font-size: 52px;
+        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
+      }
+
+      &.kek {
+        color: var(--c2);
+      }
+
+      &.cringe {
+        color: var(--c5);
+      }
+
+      &.nothing {
+        color: var(--c3);
+      }
+    }
+
+    .green {
+      color: var(--c2);
+    }
+    .red {
+      color: var(--c5);
+    }
+  }
 
   .stat-block {
     display: flex;
@@ -197,11 +324,11 @@ const router = useRouter();
 
     .title {
       width: 100%;
-      text-align: center;
       font-weight: bold;
       margin-bottom: 0;
-      padding: 21px 0;
-      font-size: 32px;
+      padding: 8px 0;
+      padding-left: 18px;
+      font-size: 26px;
       text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
     }
 
@@ -251,6 +378,8 @@ const router = useRouter();
           transform: scale(1.1) rotate(4deg);
         }
       }
+
+      margin-bottom: 10px;
     }
 
     .stats {
@@ -270,6 +399,15 @@ const router = useRouter();
     flex-wrap: wrap;
     justify-content: center;
     gap: 16px;
+  }
+}
+
+@keyframes winner-appear {
+  0% {
+    transform: scaleX(0);
+  }
+  100% {
+    transform: scaleX(1);
   }
 }
 </style>
