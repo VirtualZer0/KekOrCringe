@@ -79,4 +79,5 @@ export default {
   kekWinnerName: 'KEKES',
   cringeWinnerName: 'CRINGE',
   nothingWinnerName: 'DRAW',
+  errEmojiLoading: 'Failed to load emoji from',
 };

@@ -40,9 +40,13 @@ import { useStore } from '@/store';
 
 import Button from 'primevue/button';
 import { useRouter } from 'vue-router';
+import { useToast } from 'primevue/usetoast';
+import { useI18n } from 'vue-i18n';
 
 const router = useRouter();
 const store = useStore();
+const toast = useToast();
+const { t } = useI18n();
 
 const videoSettings = ref({ ...store.videoSettings });
 const variantsSettings = ref([...store.variantsSettings]);
@@ -71,64 +75,91 @@ const loadBasicData = async () => {
 };
 
 const loadBttvEmotes = async () => {
-  const result = await (
-    await fetch(
-      `https://api.betterttv.net/3/cached/users/twitch/${store.twitchId}`
-    )
-  ).json();
-  const emotes = [];
-  if (result.channelEmotes) {
-    emotes.push(...result.channelEmotes);
-  }
+  try {
+    const result = await (
+      await fetch(
+        `https://api.betterttv.net/3/cached/users/twitch/${store.twitchId}`
+      )
+    ).json();
+    const emotes = [];
+    if (result.channelEmotes) {
+      emotes.push(...result.channelEmotes);
+    }
 
-  if (result.sharedEmotes) {
-    emotes.push(...result.sharedEmotes);
-  }
+    if (result.sharedEmotes) {
+      emotes.push(...result.sharedEmotes);
+    }
 
-  store.setEmotes({
-    name: 'bttv',
-    value: emotes.map((emote) => ({
-      name: emote.code.toLowerCase(),
-      url: `https://cdn.betterttv.net/emote/${emote.id}/2x.${emote.imageType}`,
-    })),
-  });
+    store.setEmotes({
+      name: 'bttv',
+      value: emotes.map((emote) => ({
+        name: emote.code.toLowerCase(),
+        url: `https://cdn.betterttv.net/emote/${emote.id}/2x.${emote.imageType}`,
+      })),
+    });
+  } catch (e) {
+    console.error(e);
+    toast.add({
+      severity: 'error',
+      summary: `${t('errEmojiLoading')} BTTV`,
+      life: 3000,
+    });
+  }
 };
 
 const loadStvEmotes = async () => {
-  const result = await (
-    await fetch(`https://api.7tv.app/v2/users/${store.twitchId}/emotes`)
-  ).json();
+  try {
+    const result = await (
+      await fetch(`https://api.7tv.app/v2/users/${store.twitchId}/emotes`)
+    ).json();
 
-  if (Array.isArray(result)) {
-    store.setEmotes({
-      name: 'stv',
-      value: result.map((emote) => ({
-        name: emote.name.toLowerCase(),
-        url: emote.urls.length > 1 ? emote.urls[1][1] : emote.urls[0][1],
-      })),
+    if (Array.isArray(result)) {
+      store.setEmotes({
+        name: 'stv',
+        value: result.map((emote) => ({
+          name: emote.name.toLowerCase(),
+          url: emote.urls.length > 1 ? emote.urls[1][1] : emote.urls[0][1],
+        })),
+      });
+    }
+  } catch (e) {
+    console.error(e);
+    toast.add({
+      severity: 'warn',
+      summary: `${t('errEmojiLoading')} 7TV`,
+      life: 5000,
     });
   }
 };
 
 const loadFfzEmotes = async () => {
-  const result = await (
-    await fetch(`https://api.frankerfacez.com/v1/room/id/${store.twitchId}`)
-  ).json();
+  try {
+    const result = await (
+      await fetch(`https://api.frankerfacez.com/v1/room/id/${store.twitchId}`)
+    ).json();
 
-  const emotes: any[] = [];
-  if (result.sets && Object.values(result.sets).length > 0) {
-    Object.values(result.sets).forEach((emoteSet: any) => {
-      emotes.push(...emoteSet.emoticons);
+    const emotes: any[] = [];
+    if (result.sets && Object.values(result.sets).length > 0) {
+      Object.values(result.sets).forEach((emoteSet: any) => {
+        emotes.push(...emoteSet.emoticons);
+      });
+    }
+
+    store.setEmotes({
+      name: 'ffz',
+      value: emotes.map((emote) => ({
+        name: emote.name.toLowerCase(),
+        url: emote.urls[2],
+      })),
+    });
+  } catch (e) {
+    console.error(e);
+    toast.add({
+      severity: 'error',
+      detail: `${t('errEmojiLoading')} FFZ`,
+      life: 3000,
     });
   }
-
-  store.setEmotes({
-    name: 'ffz',
-    value: emotes.map((emote) => ({
-      name: emote.name.toLowerCase(),
-      url: emote.urls[2],
-    })),
-  });
 };
 
 const saveSettings = () => {
@@ -140,7 +171,12 @@ const saveSettings = () => {
 onMounted(async () => {
   await loadBasicData();
   if (store.twitchId) {
-    await Promise.all([loadBttvEmotes(), loadStvEmotes(), loadFfzEmotes()]);
+    await Promise.allSettled([
+      loadBttvEmotes(),
+      loadStvEmotes(),
+      loadFfzEmotes(),
+    ]);
+
     store.save();
   }
 });

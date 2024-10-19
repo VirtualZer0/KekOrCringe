@@ -54,10 +54,7 @@
             maxHeight: `${playerSizeH}vmax`,
           }"
         >
-          <div
-            class="launch-block"
-            v-if="!currentVote.videoId"
-          >
+          <div class="launch-block" v-if="!currentVote.videoId">
             Ожидаем появления видео
           </div>
           <YouTube
@@ -78,10 +75,7 @@
             :voteCount="currentVote.voteCount"
             :width="playerSize.width"
           />
-          <div
-            class="next-container"
-            v-if="currentVote.videoId"
-          >
+          <div class="next-container" v-if="currentVote.videoId">
             <Button
               icon="pi pi-fast-forward"
               class="next-button"
@@ -174,7 +168,7 @@ const recalcStatistics = (winner: 'cringe' | 'kek') => {
       100;
     if (
       statistics.value[statType][`most${capitalizedWinner}Video`] == null ||
-      statistics.value[statType][`most${capitalizedWinner}Video`].percent >
+      statistics.value[statType][`most${capitalizedWinner}Video`].percent <
         percent ||
       (statistics.value[statType][`most${capitalizedWinner}Video`].percent ==
         percent &&

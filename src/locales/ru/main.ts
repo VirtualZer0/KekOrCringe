@@ -79,4 +79,5 @@ export default {
   kekWinnerName: 'КЕКОВ',
   cringeWinnerName: 'КРИНЖА',
   nothingWinnerName: 'НИЧЬЯ',
+  errEmojiLoading: 'Не удалось загрузить эмоджи из',
 };
