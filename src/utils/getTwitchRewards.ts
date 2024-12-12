@@ -20,7 +20,7 @@ export const getTwitchRewards = async (channel: string) => {
 
   const clientId = 'kimne78kx3ncx6brgo4mv6wki5h1ko';
 
-  return await (
+  return (
     await fetch('https://gql.twitch.tv/gql', {
       headers: {
         'client-id': clientId,
