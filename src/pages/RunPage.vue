@@ -128,7 +128,7 @@ import RateBlock from '@/components/RateBlock.vue';
 import RateBar from '@/components/RateBar.vue';
 import VideoQueue from '@/components/VideoQueue.vue';
 import { useChat } from '@/utils/useChat';
-import { toast } from 'vue-sonner';
+import { notify } from '@/utils/notify';
 import { useI18n } from 'vue-i18n';
 
 const router = useRouter();
@@ -193,7 +193,7 @@ const recalcStatistics = (winner: 'cringe' | 'kek') => {
 };
 
 const showErrToast = (msg: string) => {
-  toast.error(t('error'), {
+  notify.error(t('error'), {
     description: msg,
     duration: 3000,
   });
@@ -475,11 +475,11 @@ const tryUseMessage = async (user: string, msg: string) =>
   await handleUserMessage('message', user, msg);
 
 const onChatConnected = () => {
-  toast.success(t('chatConnected'), { duration: 2500 });
+  notify.success(t('chatConnected'), { duration: 2500 });
 };
 
 const onChatError = (message: string) => {
-  toast.error(t('chatError'), {
+  notify.error(t('chatError'), {
     description: message,
     duration: 5000,
   });
@@ -495,14 +495,14 @@ const validateRewardSetting = () => {
   if (store.videoSettings.addVideoMethod !== 'reward') return;
   const selectedId = store.videoSettings.selectedRewardId;
   if (!selectedId) {
-    toast.warning(t('warning'), {
+    notify.warning(t('warning'), {
       description: t('rewardNotSelected'),
       duration: 5000,
     });
     return;
   }
   if (!store.rewardsCache.find((r) => r.id === selectedId)) {
-    toast.warning(t('warning'), {
+    notify.warning(t('warning'), {
       description: t('rewardNotFound'),
       duration: 5000,
     });

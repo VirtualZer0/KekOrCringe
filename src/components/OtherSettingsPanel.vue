@@ -83,7 +83,7 @@ import { Upload, Download, BarChart, Trash2 } from 'lucide-vue-next';
 import { useStore } from '@/store';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import { toast } from 'vue-sonner';
+import { notify } from '@/utils/notify';
 import { saveAs } from 'file-saver';
 
 const store = useStore();
@@ -97,7 +97,7 @@ const doResetSettings = () => {
   store.$reset();
   store.save();
   router.push('/');
-  toast.warning(t('settings.resetSettings'), {
+  notify.warning(t('settings.resetSettings'), {
     description: t('settings.resetSettingsDone'),
     duration: 3000,
   });
@@ -105,7 +105,7 @@ const doResetSettings = () => {
 
 const doClearStatistic = () => {
   localStorage.removeItem('statistics');
-  toast.warning(t('settings.clearStatistic'), {
+  notify.warning(t('settings.clearStatistic'), {
     description: t('settings.clearStatisticDone'),
     duration: 3000,
   });
@@ -119,7 +119,7 @@ const exportSettings = () => {
 };
 
 const showImportError = (ex: unknown) => {
-  toast.error(t('settings.importSettings'), {
+  notify.error(t('settings.importSettings'), {
     description: t('settings.importSettingsError'),
     duration: 3000,
   });
@@ -178,7 +178,7 @@ const importSettings = () => {
               store.variantsSettings.push(defaultCringe);
             }
 
-            toast.success(t('settings.importSettings'), {
+            notify.success(t('settings.importSettings'), {
               description: t('settings.importSettingsDone'),
               duration: 3000,
             });

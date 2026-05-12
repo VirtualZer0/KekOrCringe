@@ -1,6 +1,37 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 200 1000;
+  font-display: swap;
+  src: url('../fonts/nunito-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 200 1000;
+  font-display: swap;
+  src: url('../fonts/nunito-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7,
+    U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF,
+    U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 200 1000;
+  font-display: swap;
+  src: url('../fonts/nunito-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
 @custom-variant dark (&:is(.dark *));
 
 :root {
@@ -23,6 +54,32 @@
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.6017 0.094 178.84);
+
+  --font-display: 'Nunito', 'Segoe UI', sans-serif;
+  --rim-border: 2px solid var(--c1);
+
+  --ease-drop: cubic-bezier(0.4, 0, 0.5, 1.25);
+  --ease-fly: cubic-bezier(0.3, 1.4, 0.5, 1);
+  --ease-switch: cubic-bezier(0.4, 0, 0.2, 1);
+
+  --enter-1: 0.3s;
+  --enter-2: 0.6s;
+  --enter-3: 0.85s;
+  --enter-4: 1.15s;
+  --enter-5: 1.25s;
+  --enter-6: 1.5s;
+  --enter-7: 1.55s;
+
+  --press-shift-sm: 2px;
+  --press-shift-lg: 4px;
+
+  --route-anim: 210ms;
+
+  --switch-pad: 4px;
+  --switch-gap: 4px;
+
+  --rim-pad-top: 6px;
+  --rim-pad-bottom: 12px;
 }
 
 .dark {
@@ -82,12 +139,51 @@
   }
 }
 
+@utility bevel-inset-sm {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.25),
+    0 2px 4px rgba(0, 0, 0, 0.22);
+}
+
+@utility bevel-inset {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    inset 0 -4px 0 rgba(0, 0, 0, 0.25),
+    0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+@utility bevel-inset-lg {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    inset 0 -5px 0 rgba(0, 0, 0, 0.3),
+    0 5px 12px rgba(0, 0, 0, 0.25);
+}
+
+@utility bevel-extrude-sm {
+  box-shadow:
+    0 4px 0 var(--bevel-color, var(--c1)),
+    0 8px 14px rgba(0, 0, 0, 0.2);
+}
+
+@utility bevel-extrude {
+  box-shadow:
+    0 7px 0 var(--bevel-color, var(--c1)),
+    0 14px 22px rgba(0, 0, 0, 0.22);
+}
+
+@utility bevel-extrude-lg {
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.25),
+    0 12px 0 var(--bevel-color, var(--c1)),
+    0 22px 28px rgba(0, 0, 0, 0.28);
+}
+
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: var(--font-display);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: var(--fg);
-  scrollbar-gutter: stable;
   scrollbar-width: thin;
 }
 
@@ -120,7 +216,6 @@ h1 {
 .page {
   min-width: 1120px;
   min-height: 680px;
-  max-width: calc(100vw - 8px);
 
   .content {
     position: relative;
@@ -147,14 +242,6 @@ h1 {
   justify-content: center;
 }
 
-.text-l {
-  font-size: 1.4vw;
-}
-
-.text-xxl {
-  font-size: 5vw;
-}
-
 @keyframes page-appear {
   0% {
     opacity: 0;
@@ -164,6 +251,28 @@ h1 {
   100% {
     opacity: 1;
     transform: scale(1);
+  }
+}
+
+@keyframes rise-in {
+  0% {
+    transform: translateY(16px);
+    opacity: 0;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes drop-in {
+  0% {
+    transform: translateY(-460px) rotate(var(--rot, 0deg));
+    opacity: 0.2;
+  }
+  100% {
+    transform: translateY(0) rotate(var(--rot, 0deg));
+    opacity: 1;
   }
 }
 
@@ -191,6 +300,20 @@ h1 {
   z-index: 0;
 }
 
+[data-slot='button'][data-variant='default'],
+[data-slot='button'][data-variant='destructive'] {
+  @apply bevel-inset-lg;
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.15s ease;
+}
+
+[data-slot='button'][data-variant='default']:active,
+[data-slot='button'][data-variant='destructive']:active {
+  @apply bevel-inset-sm;
+  transform: translateY(var(--press-shift-sm));
+}
+
 @keyframes fadeUp {
   0% {
     transform: translateY(0px);
@@ -205,4 +328,8 @@ h1 {
     transform: translateY(-150px);
     opacity: 0;
   }
+}
+
+[data-sonner-toaster] {
+  --width: 540px;
 }

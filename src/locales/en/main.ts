@@ -2,6 +2,7 @@ export default {
   kek: 'kek',
   or: 'or',
   cringe: 'cringe',
+  tagline: 'The internet will decide.',
   twitchUrl: 'Twitch channel link',
   start: 'Start',
   firstTimeTitle: 'First time?',

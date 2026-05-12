@@ -1,9 +1,9 @@
 <template>
   <main class="palette-std">
     <Toaster
-      rich-colors
       close-button
-      position="bottom-right"
+      position="top-right"
+      :visible-toasts="1"
     />
     <CircleAnim
       v-show="outAnim.enable"
@@ -21,6 +21,8 @@ import { nextTick, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import CircleAnim from './components/CircleAnim.vue';
 import { Toaster } from '@/components/ui/sonner';
+
+const ROUTE_ANIM_MS = 210;
 
 const router = useRouter();
 const inAnim = ref({
@@ -45,7 +47,7 @@ router.beforeEach((to, from, next) => {
   outAnim.value.enable = true;
   inAnim.value.color = to.meta.color as string;
   nextTick(() => {
-    setTimeout(() => next(), 210);
+    setTimeout(() => next(), ROUTE_ANIM_MS);
   });
 });
 
@@ -59,7 +61,7 @@ router.afterEach((to) => {
     setTimeout(() => {
       outAnim.value.enable = false;
       inAnim.value.enable = false;
-    }, 210);
+    }, ROUTE_ANIM_MS);
   });
 });
 </script>

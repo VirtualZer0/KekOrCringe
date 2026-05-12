@@ -5,14 +5,16 @@ import router from './router';
 import locales from './locales';
 
 import 'normalize.css';
+import 'vue-sonner/style.css';
 
 import '@/assets/style/colors.css';
 import '@/assets/style/main.css';
 import { useStore } from './store';
 import { createPinia } from 'pinia';
+import { getInitialLang } from '@/utils/locale';
 
 const i18n = createI18n({
-  locale: localStorage['lang'] ?? navigator.language,
+  locale: getInitialLang(),
   fallbackLocale: 'en',
   messages: locales,
   legacy: false,

@@ -41,7 +41,7 @@ import { useStore } from '@/store';
 
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'vue-router';
-import { toast } from 'vue-sonner';
+import { notify } from '@/utils/notify';
 import { useI18n } from 'vue-i18n';
 
 const router = useRouter();
@@ -107,7 +107,7 @@ const loadBttvEmotes = async () => {
     });
   } catch (e) {
     console.error(e);
-    toast.error(`${t('errEmojiLoading')} BTTV`, { duration: 3000 });
+    notify.error(`${t('errEmojiLoading')} BTTV`, { duration: 3000 });
   }
 };
 
@@ -131,7 +131,7 @@ const loadStvEmotes = async () => {
     }
   } catch (e) {
     console.error(e);
-    toast.warning(`${t('errEmojiLoading')} 7TV`, { duration: 5000 });
+    notify.warning(`${t('errEmojiLoading')} 7TV`, { duration: 5000 });
   }
 };
 
@@ -157,7 +157,7 @@ const loadFfzEmotes = async () => {
     });
   } catch (e) {
     console.error(e);
-    toast.error(`${t('errEmojiLoading')} FFZ`, { duration: 3000 });
+    notify.error(`${t('errEmojiLoading')} FFZ`, { duration: 3000 });
   }
 };
 

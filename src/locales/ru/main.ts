@@ -2,6 +2,7 @@ export default {
   kek: 'кек',
   or: 'или',
   cringe: 'кринж',
+  tagline: 'Интернет решит.',
   twitchUrl: 'Ссылка на Twitch',
   start: 'Начать',
   firstTimeTitle: 'Первый раз?',
