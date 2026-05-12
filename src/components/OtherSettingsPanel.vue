@@ -1,35 +1,40 @@
 <template>
-  <Card class="settings-panel">
-    <CardHeader>
-      <CardTitle>{{ $t('settings.other') }}</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <div class="flex flex-wrap justify-center gap-4">
-        <Button @click="exportSettings()">
-          <Upload />
-          {{ $t('settings.exportSettings') }}
-        </Button>
-        <Button @click="importSettings()">
-          <Download />
-          {{ $t('settings.importSettings') }}
-        </Button>
-        <Button
-          class="bg-amber-500 hover:bg-amber-600 text-white"
-          @click="showClearStats = true"
-        >
-          <BarChart />
-          {{ $t('settings.clearStatistic') }}
-        </Button>
-        <Button
-          variant="destructive"
-          @click="showResetSettings = true"
-        >
-          <Trash2 />
-          {{ $t('settings.resetSettings') }}
-        </Button>
-      </div>
-    </CardContent>
-  </Card>
+  <ChunkyPanel
+    icon="⚙️"
+    tone="c5"
+    :title="$t('settings.other')"
+  >
+    <div class="flex flex-wrap justify-center gap-4">
+      <Button
+        class="other-btn"
+        @click="exportSettings()"
+      >
+        <Upload class="size-6 stroke-[2.5]" />
+        {{ $t('settings.exportSettings') }}
+      </Button>
+      <Button
+        class="other-btn"
+        @click="importSettings()"
+      >
+        <Download class="size-6 stroke-[2.5]" />
+        {{ $t('settings.importSettings') }}
+      </Button>
+      <Button
+        class="other-btn bg-c3 hover:bg-c3/90"
+        @click="showClearStats = true"
+      >
+        <BarChart class="size-6 stroke-[2.5]" />
+        {{ $t('settings.clearStatistic') }}
+      </Button>
+      <Button
+        class="other-btn bg-c5 hover:bg-c5/90 text-white"
+        @click="showResetSettings = true"
+      >
+        <Trash2 class="size-6 stroke-[2.5]" />
+        {{ $t('settings.resetSettings') }}
+      </Button>
+    </div>
+  </ChunkyPanel>
 
   <AlertDialog v-model:open="showResetSettings">
     <AlertDialogContent>
@@ -67,7 +72,7 @@
 </template>
 <script lang="ts" setup>
 import { ref } from 'vue';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ChunkyPanel } from '@/components/ui/chunky-panel';
 import { Button } from '@/components/ui/button';
 import {
   AlertDialog,
@@ -198,3 +203,17 @@ const importSettings = () => {
   input.click();
 };
 </script>
+<style scoped>
+.other-btn {
+  flex: 1 1 auto;
+  min-width: max-content;
+  height: 60px;
+  padding: 0 20px;
+  padding-top: 0;
+  padding-bottom: 0;
+  font-size: 17px;
+  font-weight: 800;
+  gap: 10px;
+  border-radius: 14px;
+}
+</style>

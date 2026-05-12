@@ -1,22 +1,23 @@
 <template>
-  <Card class="settings-panel">
-    <CardHeader>
-      <CardTitle>{{ $t('settings.video') }}</CardTitle>
-    </CardHeader>
-    <CardContent>
-      <RewardsWindow
-        :visible="showRewardsWindow"
-        @close="showRewardsWindow = false"
-        @select="
-          videoSettings.selectedRewardId = $event;
-          showRewardsWindow = false;
-        "
-      />
+  <ChunkyPanel
+    icon="🎬"
+    tone="c2"
+    :title="$t('settings.video')"
+  >
+    <RewardsWindow
+      :visible="showRewardsWindow"
+      @close="showRewardsWindow = false"
+      @select="
+        videoSettings.selectedRewardId = $event;
+        showRewardsWindow = false;
+      "
+    />
 
-      <div class="row">
-        <div class="title">{{ $t('settings.addMethod') }}</div>
+    <div class="form-grid">
+      <div class="field">
+        <Label>{{ $t('settings.addMethod') }}</Label>
         <Select v-model="videoSettings.addVideoMethod">
-          <SelectTrigger class="w-56">
+          <SelectTrigger class="w-full">
             <SelectValue :placeholder="$t('settings.selectMethod')" />
           </SelectTrigger>
           <SelectContent>
@@ -30,18 +31,17 @@
           </SelectContent>
         </Select>
       </div>
+
       <div
         v-if="videoSettings.addVideoMethod == 'bits'"
-        class="row"
+        class="field"
       >
-        <div class="title">
-          {{ $t('settings.bitsCount') }}
-        </div>
+        <Label>{{ $t('settings.bitsCount') }}</Label>
         <NumberField
           v-model="videoSettings.bitsCount"
           :step="1"
           :min="1"
-          class="w-32"
+          class="w-40"
         >
           <NumberFieldContent>
             <NumberFieldDecrement />
@@ -50,13 +50,14 @@
           </NumberFieldContent>
         </NumberField>
       </div>
+
       <div
         v-if="videoSettings.addVideoMethod == 'reward'"
-        class="row"
+        class="field"
       >
-        <div class="title">{{ $t('settings.reward') }}</div>
+        <Label>{{ $t('settings.reward') }}</Label>
         <Button
-          class="reward h-12 gap-4 font-bold"
+          class="reward h-11 gap-4 font-bold"
           :style="getRewardStyle(selectedReward)"
           @click="showRewardsWindow = true"
         >
@@ -78,50 +79,56 @@
           </div>
         </Button>
       </div>
-      <div class="row">
-        <div class="title">{{ $t('settings.duration') }}</div>
-        <NumberField
-          v-model="videoSettings.durationFrom"
-          :step="0.1"
-          :min="0"
-          :format-options="{
-            minimumFractionDigits: 1,
-            maximumFractionDigits: 1,
-          }"
-          class="w-32"
-        >
-          <NumberFieldContent>
-            <NumberFieldDecrement />
-            <NumberFieldInput />
-            <NumberFieldIncrement />
-          </NumberFieldContent>
-        </NumberField>
-        <div>/</div>
-        <NumberField
-          v-model="videoSettings.durationTo"
-          :step="0.1"
-          :min="videoSettings.durationFrom"
-          :format-options="{
-            minimumFractionDigits: 1,
-            maximumFractionDigits: 1,
-          }"
-          class="w-32"
-        >
-          <NumberFieldContent>
-            <NumberFieldDecrement />
-            <NumberFieldInput />
-            <NumberFieldIncrement />
-          </NumberFieldContent>
-        </NumberField>
-        <div>{{ $t('settings.mins') }}</div>
+
+      <div class="field">
+        <Label>
+          {{ $t('settings.duration') }}
+          <span class="label-hint">({{ $t('settings.mins') }})</span>
+        </Label>
+        <div class="duration-row">
+          <NumberField
+            v-model="videoSettings.durationFrom"
+            :step="0.1"
+            :min="0"
+            :format-options="{
+              minimumFractionDigits: 1,
+              maximumFractionDigits: 1,
+            }"
+            class="w-40"
+          >
+            <NumberFieldContent>
+              <NumberFieldDecrement />
+              <NumberFieldInput />
+              <NumberFieldIncrement />
+            </NumberFieldContent>
+          </NumberField>
+          <span class="duration-separator">/</span>
+          <NumberField
+            v-model="videoSettings.durationTo"
+            :step="0.1"
+            :min="videoSettings.durationFrom"
+            :format-options="{
+              minimumFractionDigits: 1,
+              maximumFractionDigits: 1,
+            }"
+            class="w-40"
+          >
+            <NumberFieldContent>
+              <NumberFieldDecrement />
+              <NumberFieldInput />
+              <NumberFieldIncrement />
+            </NumberFieldContent>
+          </NumberField>
+        </div>
       </div>
-      <div class="row">
-        <div class="title">{{ $t('settings.viewCount') }}</div>
+
+      <div class="field">
+        <Label>{{ $t('settings.viewCount') }}</Label>
         <NumberField
           v-model="videoSettings.viewCount"
           :step="1"
           :min="0"
-          class="w-32"
+          class="w-40"
         >
           <NumberFieldContent>
             <NumberFieldDecrement />
@@ -130,13 +137,14 @@
           </NumberFieldContent>
         </NumberField>
       </div>
-      <div class="row">
-        <div class="title">{{ $t('settings.skipCount') }}</div>
+
+      <div class="field">
+        <Label>{{ $t('settings.skipCount') }}</Label>
         <NumberField
           v-model="videoSettings.skipCount"
           :step="1"
           :min="1"
-          class="w-32"
+          class="w-40"
         >
           <NumberFieldContent>
             <NumberFieldDecrement />
@@ -145,13 +153,14 @@
           </NumberFieldContent>
         </NumberField>
       </div>
-      <div class="row">
-        <div class="title">{{ $t('settings.queueSize') }}</div>
+
+      <div class="field">
+        <Label>{{ $t('settings.queueSize') }}</Label>
         <NumberField
           v-model="videoSettings.queueSize"
           :step="1"
           :min="5"
-          class="w-32"
+          class="w-40"
         >
           <NumberFieldContent>
             <NumberFieldDecrement />
@@ -160,28 +169,27 @@
           </NumberFieldContent>
         </NumberField>
       </div>
-      <div class="row">
-        <Checkbox
-          id="banwordsFilter"
-          v-model="videoSettings.banwordsFilter"
-        />
-        <Label for="banwordsFilter">{{ $t('settings.banwordsFilter') }}</Label>
+
+      <div class="field">
+        <Label>{{ $t('settings.banwordsFilter') }}</Label>
+        <div class="checkbox-row">
+          <Checkbox
+            id="banwordsFilter"
+            v-model="videoSettings.banwordsFilter"
+          />
+          <Label
+            for="banwordsFilter"
+            class="cursor-pointer"
+          >
+            {{ $t('settings.enabled') }}
+          </Label>
+        </div>
       </div>
-      <div
-        v-if="false"
-        class="row"
-      >
-        <Checkbox
-          id="autoSwitch"
-          v-model="videoSettings.autoSwitch"
-        />
-        <Label for="autoSwitch">{{ $t('settings.autoSwitch') }}</Label>
-      </div>
-    </CardContent>
-  </Card>
+    </div>
+  </ChunkyPanel>
 </template>
 <script lang="ts" setup>
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ChunkyPanel } from '@/components/ui/chunky-panel';
 import {
   Select,
   SelectContent,
@@ -247,15 +255,42 @@ const selectedReward = computed(() => {
 });
 </script>
 <style scoped>
-.row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 16px;
-  margin-bottom: 16px;
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  column-gap: 64px;
+  row-gap: 28px;
+}
 
-  .title {
-    width: 160px;
-  }
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.label-hint {
+  font-weight: 500;
+  opacity: 0.8;
+  margin-left: 2px;
+}
+
+.duration-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.duration-separator {
+  font-weight: 800;
+  font-size: 22px;
+  color: var(--c1);
+}
+
+.checkbox-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  height: 44px;
 }
 </style>

@@ -27,14 +27,20 @@ const forwardedProps = useForwardProps(delegatedProps);
     v-bind="forwardedProps"
     :class="
       cn(
-        'border-input data-[placeholder]:text-muted-foreground [&_svg:not([class*=\'text-\'])]:text-muted-foreground focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive dark:bg-input/30 dark:hover:bg-input/50 flex w-fit items-center justify-between gap-2 rounded-md border bg-background text-foreground cursor-pointer px-3 py-2 text-sm whitespace-nowrap shadow-xs transition-[color,box-shadow] outline-none focus-visible:ring-[3px] disabled:cursor-not-allowed disabled:opacity-50 data-[size=default]:h-9 data-[size=sm]:h-8 *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*=\'size-\'])]:size-4',
+        'chunky-rim flex w-fit items-center justify-between gap-2 rounded-xl border-[2.5px] border-c1 bg-white px-5 text-c1 font-bold whitespace-nowrap cursor-pointer outline-none transition-[transform,box-shadow,border-color]',
+        'data-[size=default]:h-11 data-[size=sm]:h-9',
+        'hover:border-c1 active:translate-y-[2px] active:chunky-rim-pressed',
+        'data-[placeholder]:text-c1/55',
+        'disabled:cursor-not-allowed disabled:opacity-50',
+        '*:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-2',
+        '[&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*=size-])]:size-5 [&_svg]:text-c1 [&_svg]:stroke-[3]',
         props.class,
       )
     "
   >
     <slot />
     <SelectIcon as-child>
-      <ChevronDown class="size-4 opacity-50" />
+      <ChevronDown class="size-5" />
     </SelectIcon>
   </SelectTrigger>
 </template>

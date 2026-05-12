@@ -12,24 +12,24 @@ const emit = defineEmits<{ remove: [] }>();
 
 <template>
   <span
-    class="inline-flex items-center gap-2 rounded-full bg-secondary text-secondary-foreground px-3 py-1 text-sm font-medium select-none"
+    class="inline-flex items-center gap-2 rounded-lg border-[2px] border-c1 bg-white text-c1 px-3 h-9 text-sm font-bold select-none shadow-[0_2px_0_var(--c1)]"
   >
     <img
       v-if="image"
       :src="image"
       :alt="label"
-      class="size-5 rounded-full"
+      class="size-5 rounded-md"
       loading="lazy"
     />
     <span>{{ label }}</span>
     <button
       v-if="removable"
       type="button"
-      class="-mr-1 inline-flex items-center justify-center rounded-full hover:bg-foreground/10 size-5 transition-colors"
+      class="-mr-1 inline-flex items-center justify-center rounded-md size-5 text-c1 hover:bg-c1/10 transition-colors cursor-pointer"
       :aria-label="`Remove ${label}`"
       @click.stop="emit('remove')"
     >
-      <XIcon class="size-3" />
+      <XIcon class="size-3.5 stroke-[3]" />
     </button>
   </span>
 </template>

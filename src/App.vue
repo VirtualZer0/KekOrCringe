@@ -3,7 +3,6 @@
     <Toaster
       close-button
       position="top-right"
-      :visible-toasts="1"
     />
     <CircleAnim
       v-show="outAnim.enable"

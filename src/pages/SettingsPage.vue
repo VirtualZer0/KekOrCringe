@@ -1,7 +1,10 @@
 <template>
   <section class="settings-page page">
     <div class="content">
-      <h1>{{ $t('settings.title') }}</h1>
+      <header class="settings-header">
+        <h1 class="settings-title">{{ $t('settings.title') }}</h1>
+        <p class="settings-tagline">{{ $t('settings.tagline') }}</p>
+      </header>
       <div class="settings-container">
         <VideoSettingsPanel
           :video-settings-in="videoSettings"
@@ -18,15 +21,66 @@
         <OtherSettingsPanel />
       </div>
     </div>
-    <Button
-      class="run-button"
-      @click="
-        saveSettings();
-        router.push('/run');
-      "
-    >
-      {{ $t('settings.run') }}
-    </Button>
+    <div class="run-area">
+      <svg
+        class="chevron left"
+        viewBox="0 0 40 80"
+        aria-hidden="true"
+      >
+        <line
+          x1="4"
+          y1="14"
+          x2="36"
+          y2="26"
+        />
+        <line
+          x1="4"
+          y1="40"
+          x2="36"
+          y2="40"
+        />
+        <line
+          x1="4"
+          y1="66"
+          x2="36"
+          y2="54"
+        />
+      </svg>
+      <button
+        type="button"
+        class="run-button"
+        @click="
+          saveSettings();
+          router.push('/run');
+        "
+      >
+        <span class="run-text">{{ $t('settings.run') }}</span>
+      </button>
+      <svg
+        class="chevron right"
+        viewBox="0 0 40 80"
+        aria-hidden="true"
+      >
+        <line
+          x1="36"
+          y1="14"
+          x2="4"
+          y2="26"
+        />
+        <line
+          x1="36"
+          y1="40"
+          x2="4"
+          y2="40"
+        />
+        <line
+          x1="36"
+          y1="66"
+          x2="4"
+          y2="54"
+        />
+      </svg>
+    </div>
   </section>
 </template>
 
@@ -39,7 +93,6 @@ import { onMounted, ref } from 'vue';
 import { getTwitchRewards } from '@/utils/getTwitchRewards';
 import { useStore } from '@/store';
 
-import { Button } from '@/components/ui/button';
 import { useRouter } from 'vue-router';
 import { notify } from '@/utils/notify';
 import { useI18n } from 'vue-i18n';
@@ -186,7 +239,21 @@ onMounted(async () => {
   width: calc(100vw - 8px);
   min-height: 100vh;
   padding-bottom: 100px;
-  background: #264653;
+  background:
+    linear-gradient(
+      135deg,
+      var(--c1) 0% 5%,
+      var(--c2) 5% 10%,
+      var(--c4) 10% 15%,
+      transparent 15% 85%,
+      var(--c4) 85% 90%,
+      var(--c5) 90% 95%,
+      var(--c1) 95% 100%
+    ),
+    radial-gradient(circle, rgba(90, 55, 0, 0.07) 1.4px, transparent 1.6px) 0 0 /
+      18px 18px,
+    var(--c3);
+  background-attachment: fixed, scroll, scroll;
 
   .settings-container {
     width: 50vw;
@@ -201,13 +268,132 @@ onMounted(async () => {
   }
 }
 
-.run-button {
-  display: block;
-  margin: 0 auto;
-  width: 300px;
+.settings-header {
+  text-align: center;
+  padding-top: 40px;
+  margin-bottom: 36px;
+  user-select: none;
+}
+
+.settings-title {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 64px;
+  letter-spacing: 0.02em;
+  line-height: 1;
+  text-transform: uppercase;
+  color: var(--c-surface);
+  -webkit-text-stroke: 3px var(--c1);
+  paint-order: stroke fill;
+  text-shadow:
+    0 1px 0 var(--c1),
+    0 2px 0 var(--c1),
+    0 3px 0 var(--c1),
+    0 4px 0 var(--c1),
+    0 5px 0 var(--c5),
+    0 6px 0 var(--c5),
+    0 7px 0 var(--c5),
+    0 8px 0 var(--c4),
+    0 9px 0 var(--c4),
+    0 10px 0 var(--c4),
+    0 14px 10px rgba(0, 0, 0, 0.25);
+  transform: rotate(-1deg);
+  display: inline-block;
+  animation: drop-in 0.5s var(--ease-drop) backwards;
+  animation-delay: var(--enter-1);
+}
+
+.settings-tagline {
+  margin: 24px 0 0;
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 18px;
+  color: var(--c1);
+  animation: rise-in 0.5s ease backwards;
+  animation-delay: var(--enter-3);
+}
+
+.run-area {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 28px;
+  margin-top: 56px;
+  user-select: none;
+  animation: rise-in 0.5s ease backwards;
+  animation-delay: var(--enter-3);
+}
+
+.chevron {
+  width: 40px;
   height: 80px;
-  font-size: 40px;
+  flex-shrink: 0;
+  overflow: visible;
+}
+
+.chevron line {
+  stroke: var(--c1);
+  stroke-width: 4;
+  stroke-linecap: round;
+}
+
+.run-button {
+  position: relative;
+  width: 360px;
+  height: 96px;
+  border: none;
+  outline: none;
+  border-radius: 36px;
   background: var(--c5);
-  border-color: var(--c5);
+  cursor: pointer;
+  padding: 0;
+  box-shadow:
+    inset 0 3px 0 rgba(255, 255, 255, 0.4),
+    inset 0 -8px 0 rgba(0, 0, 0, 0.2),
+    0 12px 0 var(--c1),
+    0 22px 28px rgba(0, 0, 0, 0.32);
+  transition:
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+.run-button:hover {
+  transform: translateY(-3px) rotate(-0.6deg);
+  box-shadow:
+    inset 0 3px 0 rgba(255, 255, 255, 0.45),
+    inset 0 -8px 0 rgba(0, 0, 0, 0.2),
+    0 15px 0 var(--c1),
+    0 26px 32px rgba(0, 0, 0, 0.34);
+}
+
+.run-button:active {
+  transform: translateY(8px) rotate(0deg);
+  box-shadow:
+    inset 0 3px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -4px 0 rgba(0, 0, 0, 0.22),
+    0 4px 0 var(--c1),
+    0 10px 14px rgba(0, 0, 0, 0.22);
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.08s ease;
+}
+
+.run-text {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 54px;
+  line-height: 1;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--c-surface);
+  -webkit-text-stroke: 4px var(--c1);
+  paint-order: stroke fill;
+  text-shadow:
+    0 2px 0 var(--c1),
+    0 4px 0 var(--c1),
+    0 8px 6px rgba(0, 0, 0, 0.25);
 }
 </style>

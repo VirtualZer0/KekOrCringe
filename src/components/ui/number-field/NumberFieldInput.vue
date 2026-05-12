@@ -10,10 +10,12 @@ const props = defineProps<{
 
 <template>
   <NumberFieldInput
-    data-slot="input"
+    data-slot="number-input"
     :class="
       cn(
-        'flex h-9 w-full rounded-md border border-input bg-background text-foreground py-1 text-sm text-center shadow-sm transition-colors placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50',
+        'chunky-rim flex h-11 w-full min-w-0 rounded-xl border-[2.5px] border-c1 bg-white text-c1 font-bold py-1 text-base text-center outline-none transition-[transform,box-shadow,border-color]',
+        'hover:border-c1',
+        'disabled:cursor-not-allowed disabled:opacity-50',
         props.class,
       )
     "

@@ -73,6 +73,10 @@
   --press-shift-sm: 2px;
   --press-shift-lg: 4px;
 
+  --rim-shadow: 0 3px 0 var(--c1);
+  --rim-shadow-pressed: 0 1px 0 var(--c1);
+  --rim-shadow-md: 0 4px 0 var(--c1);
+
   --route-anim: 210ms;
 
   --switch-pad: 4px;
@@ -177,6 +181,18 @@
     inset 0 2px 0 rgba(255, 255, 255, 0.25),
     0 12px 0 var(--bevel-color, var(--c1)),
     0 22px 28px rgba(0, 0, 0, 0.28);
+}
+
+@utility chunky-rim {
+  box-shadow: var(--rim-shadow);
+}
+
+@utility chunky-rim-pressed {
+  box-shadow: var(--rim-shadow-pressed);
+}
+
+@utility chunky-rim-md {
+  box-shadow: var(--rim-shadow-md);
 }
 
 body {
