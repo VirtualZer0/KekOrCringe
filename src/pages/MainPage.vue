@@ -9,7 +9,7 @@
       target="_blank"
       class="credits"
     >
-      <div class="pi pi-github" />
+      <Github class="size-8" />
       {{ $t('createdBy') }}
     </a>
     <LangSwitcher class="lang" />
@@ -20,6 +20,7 @@
 import LangSwitcher from '@/components/LangSwitcher.vue';
 import Logo from '@/components/Logo.vue';
 import Start from '@/components/Start.vue';
+import { Github } from 'lucide-vue-next';
 import { useRouter } from 'vue-router';
 
 const router = useRouter();
@@ -51,10 +52,6 @@ const router = useRouter();
     text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
     left: 50%;
     transform: translateX(-50%);
-
-    .pi {
-      font-size: 32px;
-    }
   }
 
   .lang {

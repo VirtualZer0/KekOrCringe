@@ -77,7 +77,7 @@ import { computed, onBeforeUpdate, onMounted, onUpdated } from 'vue';
 import { getCorrectFgColor } from '@/utils/getCorrectFgColor';
 import { useStore } from '@/store';
 
-import Button from 'primevue/button';
+import { Button } from '@/components/ui/button';
 
 const props = defineProps({
   isActive: {
@@ -124,7 +124,6 @@ onUpdated(() => emits('init', variantRefs));
   .rate-variant {
     position: relative;
     overflow: visible;
-    display: block;
     min-width: 110px;
     height: 70px;
     display: flex;

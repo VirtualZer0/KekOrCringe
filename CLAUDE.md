@@ -137,8 +137,11 @@ The `kek` and `cringe` variants are `permanent: true` and must not be deleted; s
 
 ### UI conventions
 
-- **PrimeVue** for components (registered globally; import individual components per-file, e.g. `import Button from 'primevue/button'`)
-- **PrimeVue services** wired in `main.ts`: `Toast` and `ConfirmPopup` are mounted once in `App.vue`; use `useToast()` / `useConfirm()` from PrimeVue
-- **Path alias**: `@/*` → `src/*` (configured in both `tsconfig.json` and `vite.config.ts`)
-- **Pure CSS** with native CSS Nesting (no preprocessor); component styles use `<style scoped>`; global theme vars `--c1`…`--c5` come from `@/assets/style/colors.css`. `@keyframes` must stay at top-level (not nested inside selectors).
+- **shadcn-vue** for components — copy-pasted source under `src/components/ui/<name>/`, registered via the `components.json` at repo root. Import per-file, e.g. `import { Button } from '@/components/ui/button'`. Add new ones via `npx shadcn-vue@latest add <name>` (see `components.json` for style/aliases).
+- In-house UI primitives that have no shadcn equivalent: `src/components/ui/chip` (removable pill) and `src/components/ui/color-picker` (native `<input type="color">` wrapper).
+- **Toasts**: `vue-sonner`. `<Toaster />` is mounted once in `App.vue`; call `toast.success/error/warning/info(title, { description, duration })` from anywhere.
+- **Confirm dialogs**: centered `<AlertDialog>` from `@/components/ui/alert-dialog` driven by a local `v-model:open` ref — there is no anchored-popover confirm composable.
+- **Icons**: `lucide-vue-next`. Import per icon and render as `<IconName class="size-4" />`.
+- **Path alias**: `@/*` → `src/*` (configured in `tsconfig.json`, `vite.config.ts`, and `components.json`). The `cn(...)` class-merge helper lives at `@/lib/utils`.
+- **Styling**: Tailwind v4 (configured in `src/assets/style/main.css` via `@import "tailwindcss"` + `@theme inline { … }`). Prefer Tailwind utilities for layout, spacing, typography, and basic colors. Brand colors `--c1`…`--c5` are exposed both as CSS vars (in `colors.css`) and as Tailwind utilities (`bg-c1`, `text-c5`, …). Keep complex bespoke styles (animations, multi-stop gradients, custom positioning, particle effects) in scoped `<style>` blocks. `@keyframes` must stay at top-level (not nested inside selectors).
 - ESLint enforces single quotes, no semicolons-via-prettier, `singleAttributePerLine`, `arrowParens: always`

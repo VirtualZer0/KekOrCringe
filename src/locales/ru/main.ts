@@ -25,7 +25,7 @@ export default {
     selectReward: 'Выберите награду',
     duration: 'Длительность',
     mins: 'минут',
-    viewCount: 'Просмотров, от',
+    viewCount: 'Мин. просмотров',
     queueSize: 'Размер очереди',
     banwordsFilter: 'Фильтр банвордов в названии',
     selectMethod: 'Выберите способ',

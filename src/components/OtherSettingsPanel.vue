@@ -1,87 +1,113 @@
 <template>
-  <Panel
-    :header="$t('settings.other')"
-    class="settings-panel"
-  >
-    <div class="other-settings">
-      <Button
-        :label="$t('settings.exportSettings')"
-        icon="pi pi-upload"
-        @click="exportSettings()"
-      />
-      <Button
-        :label="$t('settings.importSettings')"
-        icon="pi pi-download"
-        @click="importSettings()"
-      />
-      <Button
-        :label="$t('settings.clearStatistic')"
-        severity="warning"
-        icon="pi pi-chart-bar"
-        @click="clearStatistic"
-      />
-      <Button
-        :label="$t('settings.resetSettings')"
-        severity="danger"
-        icon="pi pi-trash"
-        @click="resetSettings"
-      />
-    </div>
-  </Panel>
+  <Card class="settings-panel">
+    <CardHeader>
+      <CardTitle>{{ $t('settings.other') }}</CardTitle>
+    </CardHeader>
+    <CardContent>
+      <div class="flex flex-wrap justify-center gap-4">
+        <Button @click="exportSettings()">
+          <Upload />
+          {{ $t('settings.exportSettings') }}
+        </Button>
+        <Button @click="importSettings()">
+          <Download />
+          {{ $t('settings.importSettings') }}
+        </Button>
+        <Button
+          class="bg-amber-500 hover:bg-amber-600 text-white"
+          @click="showClearStats = true"
+        >
+          <BarChart />
+          {{ $t('settings.clearStatistic') }}
+        </Button>
+        <Button
+          variant="destructive"
+          @click="showResetSettings = true"
+        >
+          <Trash2 />
+          {{ $t('settings.resetSettings') }}
+        </Button>
+      </div>
+    </CardContent>
+  </Card>
+
+  <AlertDialog v-model:open="showResetSettings">
+    <AlertDialogContent>
+      <AlertDialogHeader>
+        <AlertDialogTitle>{{ $t('settings.resetSettings') }}</AlertDialogTitle>
+        <AlertDialogDescription>
+          {{ $t('settings.resetSettingsConfirm') }}
+        </AlertDialogDescription>
+      </AlertDialogHeader>
+      <AlertDialogFooter>
+        <AlertDialogCancel>{{ $t('settings.no') }}</AlertDialogCancel>
+        <AlertDialogAction @click="doResetSettings">
+          {{ $t('settings.yes') }}
+        </AlertDialogAction>
+      </AlertDialogFooter>
+    </AlertDialogContent>
+  </AlertDialog>
+
+  <AlertDialog v-model:open="showClearStats">
+    <AlertDialogContent>
+      <AlertDialogHeader>
+        <AlertDialogTitle>{{ $t('settings.clearStatistic') }}</AlertDialogTitle>
+        <AlertDialogDescription>
+          {{ $t('settings.clearStatisticConfirm') }}
+        </AlertDialogDescription>
+      </AlertDialogHeader>
+      <AlertDialogFooter>
+        <AlertDialogCancel>{{ $t('settings.no') }}</AlertDialogCancel>
+        <AlertDialogAction @click="doClearStatistic">
+          {{ $t('settings.yes') }}
+        </AlertDialogAction>
+      </AlertDialogFooter>
+    </AlertDialogContent>
+  </AlertDialog>
 </template>
 <script lang="ts" setup>
-import Panel from 'primevue/panel';
-import Button from 'primevue/button';
+import { ref } from 'vue';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { Upload, Download, BarChart, Trash2 } from 'lucide-vue-next';
 import { useStore } from '@/store';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
-import { useToast } from 'primevue/usetoast';
-import { useConfirm } from 'primevue/useconfirm';
+import { toast } from 'vue-sonner';
 import { saveAs } from 'file-saver';
 
 const store = useStore();
 const router = useRouter();
-const toast = useToast();
-const confirm = useConfirm();
 const { t } = useI18n();
 
-const resetSettings = (ev: Event) => {
-  confirm.require({
-    target: ev.currentTarget as HTMLElement,
-    message: t('settings.resetSettingsConfirm'),
-    icon: 'pi pi-exclamation-triangle',
-    acceptLabel: t('settings.yes'),
-    rejectLabel: t('settings.no'),
-    accept: () => {
-      store.$reset();
-      store.save();
-      router.push('/');
-      toast.add({
-        severity: 'warn',
-        detail: t('settings.resetSettingsDone'),
-        summary: t('settings.resetSettings'),
-        life: 3000,
-      });
-    },
+const showResetSettings = ref(false);
+const showClearStats = ref(false);
+
+const doResetSettings = () => {
+  store.$reset();
+  store.save();
+  router.push('/');
+  toast.warning(t('settings.resetSettings'), {
+    description: t('settings.resetSettingsDone'),
+    duration: 3000,
   });
 };
 
-const clearStatistic = (ev: Event) => {
-  confirm.require({
-    target: ev.currentTarget as HTMLElement,
-    message: t('settings.clearStatisticConfirm'),
-    icon: 'pi pi-exclamation-triangle',
-    acceptLabel: t('settings.yes'),
-    rejectLabel: t('settings.no'),
-    accept: () => {
-      localStorage.removeItem('statistics');
-      toast.add({
-        severity: 'warn',
-        detail: t('settings.clearStatisticDone'),
-        summary: t('settings.clearStatistic'),
-        life: 3000,
-      });
-    },
+const doClearStatistic = () => {
+  localStorage.removeItem('statistics');
+  toast.warning(t('settings.clearStatistic'), {
+    description: t('settings.clearStatisticDone'),
+    duration: 3000,
   });
 };
 
@@ -93,11 +119,9 @@ const exportSettings = () => {
 };
 
 const showImportError = (ex: unknown) => {
-  toast.add({
-    detail: t('settings.importSettingsError'),
-    summary: t('settings.importSettings'),
-    life: 3000,
-    severity: 'error',
+  toast.error(t('settings.importSettings'), {
+    description: t('settings.importSettingsError'),
+    duration: 3000,
   });
 
   console.error(ex);
@@ -154,11 +178,9 @@ const importSettings = () => {
               store.variantsSettings.push(defaultCringe);
             }
 
-            toast.add({
-              detail: t('settings.importSettingsDone'),
-              summary: t('settings.importSettings'),
-              life: 3000,
-              severity: 'success',
+            toast.success(t('settings.importSettings'), {
+              description: t('settings.importSettingsDone'),
+              duration: 3000,
             });
             store.save();
 
@@ -176,11 +198,3 @@ const importSettings = () => {
   input.click();
 };
 </script>
-<style scoped>
-.other-settings {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 16px;
-}
-</style>

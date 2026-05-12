@@ -1,7 +1,10 @@
 <template>
   <main class="palette-std">
-    <Toast />
-    <ConfirmPopup />
+    <Toaster
+      rich-colors
+      close-button
+      position="bottom-right"
+    />
     <CircleAnim
       v-show="outAnim.enable"
       v-bind="outAnim"
@@ -17,8 +20,7 @@
 import { nextTick, ref } from 'vue';
 import { useRouter } from 'vue-router';
 import CircleAnim from './components/CircleAnim.vue';
-import Toast from 'primevue/toast';
-import ConfirmPopup from 'primevue/confirmpopup';
+import { Toaster } from '@/components/ui/sonner';
 
 const router = useRouter();
 const inAnim = ref({

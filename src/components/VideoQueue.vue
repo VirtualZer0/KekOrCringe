@@ -1,62 +1,81 @@
 <template>
-  <Drawer
-    class="queue-sidebar"
-    :visible="props.visible"
-    :style="{ width: '25vw', minWidth: '460px' }"
-    @update:visible="emits('close')"
+  <Sheet
+    :open="props.visible"
+    @update:open="!$event && emits('close')"
   >
-    <h2>{{ $t('videoQueue') }}</h2>
-    <div class="queue-list">
-      <div
-        v-for="video in props.queue"
-        :key="video.id"
-        class="queue-item"
-        :class="{
-          current: video.id == props.currentPlaying,
-        }"
-      >
-        <Button
-          icon="pi pi-trash"
-          class="remove"
-          severity="danger"
-          @click="emits('remove', video.id)"
-        />
-        <img
-          :src="video.preview"
-          :alt="video.title"
-        />
-        <div class="right">
-          <div class="title">{{ video.title }}</div>
-          <div class="stats">
-            <div class="stat">
-              <span class="pi pi-eye" /> {{ video.viewCount }}
-            </div>
-            <div class="stat">
-              <span class="pi pi-clock" />
-              {{
-                new Date(video.duration * 1000).toISOString().substring(14, 19)
-              }}
-            </div>
-            <div class="stat">
-              <span class="pi pi-user" />
-              {{ video.user }}
+    <SheetContent
+      side="right"
+      class="w-[25vw] min-w-[460px] sm:max-w-none p-4"
+    >
+      <SheetHeader class="px-0 pt-0">
+        <SheetTitle>{{ $t('videoQueue') }}</SheetTitle>
+        <SheetDescription class="sr-only">
+          {{ $t('videoQueue') }}
+        </SheetDescription>
+      </SheetHeader>
+      <div class="queue-list">
+        <div
+          v-for="video in props.queue"
+          :key="video.id"
+          class="queue-item"
+          :class="{
+            current: video.id == props.currentPlaying,
+          }"
+        >
+          <Button
+            variant="destructive"
+            size="icon"
+            class="remove size-8"
+            @click="emits('remove', video.id)"
+          >
+            <Trash2 />
+          </Button>
+          <img
+            :src="video.preview"
+            :alt="video.title"
+          />
+          <div class="right">
+            <div class="title">{{ video.title }}</div>
+            <div class="stats">
+              <div class="stat">
+                <Eye class="size-4" /> {{ video.viewCount }}
+              </div>
+              <div class="stat">
+                <Clock class="size-4" />
+                {{
+                  new Date(video.duration * 1000)
+                    .toISOString()
+                    .substring(14, 19)
+                }}
+              </div>
+              <div class="stat">
+                <User class="size-4" />
+                {{ video.user }}
+              </div>
             </div>
           </div>
         </div>
+        <div
+          class="clear-all"
+          @click="emits('clear')"
+        >
+          {{ $t('clearAllQueue') }}
+        </div>
       </div>
-      <div
-        class="clear-all"
-        @click="emits('clear')"
-      >
-        {{ $t('clearAllQueue') }}
-      </div>
-    </div>
-  </Drawer>
+    </SheetContent>
+  </Sheet>
 </template>
 <script lang="ts" setup>
 import { IVideoData } from '@/utils/YTUtils';
-import Button from 'primevue/button';
-import Drawer from 'primevue/drawer';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
+import { Button } from '@/components/ui/button';
+import { Trash2, Eye, Clock, User } from 'lucide-vue-next';
 import { PropType } from 'vue';
 
 const emits = defineEmits(['close', 'remove', 'clear']);
@@ -80,11 +99,6 @@ const props = defineProps({
 </script>
 <style scoped>
 .queue-list {
-  h2 {
-    margin-top: 0;
-    padding-top: 0;
-  }
-
   .queue-item {
     position: relative;
     display: flex;
@@ -99,8 +113,6 @@ const props = defineProps({
 
     .remove {
       position: absolute;
-      width: 32px;
-      height: 32px;
       right: 8px;
       bottom: 8px;
     }

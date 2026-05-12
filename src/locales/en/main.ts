@@ -25,7 +25,7 @@ export default {
     selectReward: 'Select reward',
     duration: 'Duration',
     mins: 'mins',
-    viewCount: 'View count, from',
+    viewCount: 'Min view count',
     queueSize: 'Queue size',
     banwordsFilter: 'Banwords filter',
     selectMethod: 'Select method',

@@ -1,36 +1,45 @@
 <template>
-  <div class="start">
-    <InputText
+  <div class="flex justify-center gap-4 mt-[120px]">
+    <Input
       v-model="url"
-      class="p-inputtext-lg input"
+      class="w-[500px] h-12 text-lg"
       :placeholder="$t('twitchUrl')"
       @keypress.enter="start()"
     />
-    <Button @click="start()">{{ $t('start') }}</Button>
-    <Dialog
-      v-model:visible="showFirstTime"
-      modal
-      :header="$t('firstTimeTitle')"
+    <Button
+      class="h-12 px-6"
+      @click="start()"
     >
-      <p>
-        {{ $t('firstTimeText') }}
-      </p>
+      {{ $t('start') }}
+    </Button>
+    <Dialog v-model:open="showFirstTime">
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>{{ $t('firstTimeTitle') }}</DialogTitle>
+          <DialogDescription>{{ $t('firstTimeText') }}</DialogDescription>
+        </DialogHeader>
+      </DialogContent>
     </Dialog>
   </div>
 </template>
 
 <script lang="ts" setup>
-import InputText from 'primevue/inputtext';
-import Button from 'primevue/button';
-import Dialog from 'primevue/dialog';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { useI18n } from 'vue-i18n';
 import { ref, watch } from 'vue';
-import { useToast } from 'primevue/usetoast';
+import { toast } from 'vue-sonner';
 import { useStore } from '@/store';
 
 const emits = defineEmits(['start']);
 
-const toast = useToast();
 const { t } = useI18n();
 const store = useStore();
 
@@ -45,11 +54,9 @@ watch(showFirstTime, (open) => {
 });
 
 const showErr = () => {
-  toast.add({
-    severity: 'error',
-    summary: t('error'),
-    detail: t('nameErr'),
-    life: 6000,
+  toast.error(t('error'), {
+    description: t('nameErr'),
+    duration: 6000,
   });
 };
 
@@ -85,15 +92,3 @@ const start = () => {
   emits('start', '/settings');
 };
 </script>
-
-<style scoped>
-.start {
-  display: flex;
-  justify-content: center;
-  gap: 16px;
-  margin-top: 120px;
-  .input {
-    width: 500px;
-  }
-}
-</style>

@@ -19,13 +19,14 @@
       </div>
     </div>
     <Button
-      class="run-button p-button-lg"
-      :label="$t('settings.run')"
+      class="run-button"
       @click="
         saveSettings();
         router.push('/run');
       "
-    ></Button>
+    >
+      {{ $t('settings.run') }}
+    </Button>
   </section>
 </template>
 
@@ -38,14 +39,13 @@ import { onMounted, ref } from 'vue';
 import { getTwitchRewards } from '@/utils/getTwitchRewards';
 import { useStore } from '@/store';
 
-import Button from 'primevue/button';
+import { Button } from '@/components/ui/button';
 import { useRouter } from 'vue-router';
-import { useToast } from 'primevue/usetoast';
+import { toast } from 'vue-sonner';
 import { useI18n } from 'vue-i18n';
 
 const router = useRouter();
 const store = useStore();
-const toast = useToast();
 const { t } = useI18n();
 
 const videoSettings = ref(JSON.parse(JSON.stringify(store.videoSettings)));
@@ -107,11 +107,7 @@ const loadBttvEmotes = async () => {
     });
   } catch (e) {
     console.error(e);
-    toast.add({
-      severity: 'error',
-      summary: `${t('errEmojiLoading')} BTTV`,
-      life: 3000,
-    });
+    toast.error(`${t('errEmojiLoading')} BTTV`, { duration: 3000 });
   }
 };
 
@@ -135,11 +131,7 @@ const loadStvEmotes = async () => {
     }
   } catch (e) {
     console.error(e);
-    toast.add({
-      severity: 'warn',
-      summary: `${t('errEmojiLoading')} 7TV`,
-      life: 5000,
-    });
+    toast.warning(`${t('errEmojiLoading')} 7TV`, { duration: 5000 });
   }
 };
 
@@ -165,11 +157,7 @@ const loadFfzEmotes = async () => {
     });
   } catch (e) {
     console.error(e);
-    toast.add({
-      severity: 'error',
-      detail: `${t('errEmojiLoading')} FFZ`,
-      life: 3000,
-    });
+    toast.error(`${t('errEmojiLoading')} FFZ`, { duration: 3000 });
   }
 };
 

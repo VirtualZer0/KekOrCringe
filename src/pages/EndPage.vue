@@ -156,23 +156,24 @@
     </div>
 
     <div class="buttons">
-      <Button
-        :label="$t('repeat')"
-        icon="pi pi-arrow-left"
-        @click="router.back()"
-      />
+      <Button @click="router.back()">
+        <ArrowLeft />
+        {{ $t('repeat') }}
+      </Button>
 
       <Button
-        :label="$t('home')"
-        icon="pi pi-home"
-        severity="warning"
+        class="bg-amber-500 hover:bg-amber-600 text-white"
         @click="router.push('/')"
-      />
+      >
+        <Home />
+        {{ $t('home') }}
+      </Button>
     </div>
   </section>
 </template>
 <script lang="ts" setup>
-import Button from 'primevue/button';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft, Home } from 'lucide-vue-next';
 import { getStatistics } from '@/utils/statisticsUtils';
 import { useRouter } from 'vue-router';
 import { onBeforeUnmount, onMounted, ref } from 'vue';

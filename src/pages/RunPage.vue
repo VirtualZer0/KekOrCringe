@@ -15,19 +15,20 @@
     />
     <div class="content">
       <div class="left-menu">
+        <Button @click="showQueue = true">
+          <Images />
+          {{ $t('queue') }}
+          <Badge class="queue-badge ml-1">
+            {{ Object.keys(videoList).length }}
+          </Badge>
+        </Button>
         <Button
-          icon="pi pi-images"
-          :label="$t('queue')"
-          :badge="Object.keys(videoList).length.toString()"
-          badge-class="queue-badge"
-          @click="showQueue = true"
-        />
-        <Button
-          icon="pi pi-power-off"
-          severity="danger"
-          :label="$t('end')"
+          variant="destructive"
           @click="router.push('/end')"
-        />
+        >
+          <Power />
+          {{ $t('end') }}
+        </Button>
       </div>
       <div
         v-if="currentVote.videoId"
@@ -83,16 +84,15 @@
             class="next-container"
           >
             <Button
-              icon="pi pi-fast-forward"
               class="next-button"
               :disabled="!currentVote.isActive"
               @click="launchResult()"
-            />
-            <Badge
-              class="next-badge"
-              :value="currentVote.skipCount"
-              size="xlarge"
-            />
+            >
+              <FastForward />
+            </Button>
+            <Badge class="next-badge">
+              {{ currentVote.skipCount }}
+            </Badge>
           </div>
         </div>
       </div>
@@ -114,7 +114,9 @@ import {
   IVideoData,
 } from '@/utils/YTUtils';
 import YouTube from 'vue3-youtube';
-import Button from 'primevue/button';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Images, Power, FastForward } from 'lucide-vue-next';
 import VideoResult from '@/components/VideoResult.vue';
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
@@ -125,15 +127,13 @@ import { getRandItem } from '@/utils/getRandItem';
 import RateBlock from '@/components/RateBlock.vue';
 import RateBar from '@/components/RateBar.vue';
 import VideoQueue from '@/components/VideoQueue.vue';
-import Badge from 'primevue/badge';
 import { useChat } from '@/utils/useChat';
-import { useToast } from 'primevue/usetoast';
+import { toast } from 'vue-sonner';
 import { useI18n } from 'vue-i18n';
 
 const router = useRouter();
 const store = useStore();
 const chat = useChat();
-const toast = useToast();
 const { t } = useI18n();
 
 const showQueue = ref(false);
@@ -193,11 +193,9 @@ const recalcStatistics = (winner: 'cringe' | 'kek') => {
 };
 
 const showErrToast = (msg: string) => {
-  toast.add({
-    severity: 'error',
-    summary: t('error'),
-    detail: msg,
-    life: 3000,
+  toast.error(t('error'), {
+    description: msg,
+    duration: 3000,
   });
 };
 
@@ -477,19 +475,13 @@ const tryUseMessage = async (user: string, msg: string) =>
   await handleUserMessage('message', user, msg);
 
 const onChatConnected = () => {
-  toast.add({
-    severity: 'success',
-    summary: t('chatConnected'),
-    life: 2500,
-  });
+  toast.success(t('chatConnected'), { duration: 2500 });
 };
 
 const onChatError = (message: string) => {
-  toast.add({
-    severity: 'error',
-    summary: t('chatError'),
-    detail: message,
-    life: 5000,
+  toast.error(t('chatError'), {
+    description: message,
+    duration: 5000,
   });
 };
 
@@ -503,20 +495,16 @@ const validateRewardSetting = () => {
   if (store.videoSettings.addVideoMethod !== 'reward') return;
   const selectedId = store.videoSettings.selectedRewardId;
   if (!selectedId) {
-    toast.add({
-      severity: 'warn',
-      summary: t('warning'),
-      detail: t('rewardNotSelected'),
-      life: 5000,
+    toast.warning(t('warning'), {
+      description: t('rewardNotSelected'),
+      duration: 5000,
     });
     return;
   }
   if (!store.rewardsCache.find((r) => r.id === selectedId)) {
-    toast.add({
-      severity: 'warn',
-      summary: t('warning'),
-      detail: t('rewardNotFound'),
-      life: 5000,
+    toast.warning(t('warning'), {
+      description: t('rewardNotFound'),
+      duration: 5000,
     });
   }
 };
@@ -647,6 +635,8 @@ onBeforeUnmount(() => {
   .next-badge {
     background: var(--c5);
     border-radius: 12px;
+    font-size: 18px;
+    padding: 6px 12px;
   }
 }
 
