@@ -200,12 +200,21 @@ if (score > 0) {
   winner.value = 'nothing';
 }
 
-let timer: number | null = null;
+let particleTimeout: number | null = null;
+let particleInterval: number | null = null;
 
 onMounted(() => {
   if (winnerContainer.value !== undefined) {
-    setTimeout(() => {
-      timer = setInterval(() => {
+    particleTimeout = window.setTimeout(() => {
+      particleTimeout = null;
+      particleInterval = window.setInterval(() => {
+        if (!winnerContainer.value) {
+          if (particleInterval !== null) {
+            clearInterval(particleInterval);
+            particleInterval = null;
+          }
+          return;
+        }
         spawnRandomParticle(
           [winner.value],
           winnerContainer.value as any,
@@ -218,7 +227,16 @@ onMounted(() => {
   }
 });
 
-onBeforeUnmount(() => clearInterval(timer as number));
+onBeforeUnmount(() => {
+  if (particleTimeout !== null) {
+    clearTimeout(particleTimeout);
+    particleTimeout = null;
+  }
+  if (particleInterval !== null) {
+    clearInterval(particleInterval);
+    particleInterval = null;
+  }
+});
 </script>
 <style lang="scss" scoped>
 .end-page {

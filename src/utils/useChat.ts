@@ -16,7 +16,24 @@ export const useChat = () => {
     if (!connected) await chat?.connect();
   };
 
+  const disposeCurrent = () => {
+    if (chat) {
+      try {
+        chat.removeAllListeners();
+      } catch {
+        // ignore
+      }
+      chat.disconnect().catch(() => {
+        // ignore disconnect errors (already disconnected, etc.)
+      });
+    }
+    chat = null;
+    connected = false;
+  };
+
   const create = (channel: string) => {
+    disposeCurrent();
+
     chat = new tmi.Client({
       channels: [channel],
     });
@@ -55,6 +72,10 @@ export const useChat = () => {
     });
   };
 
+  const destroy = () => {
+    disposeCurrent();
+  };
+
   const on = (
     type: 'Reward' | 'Message' | 'Bits',
     cb: (...args: any) => void
@@ -75,6 +96,7 @@ export const useChat = () => {
   return {
     create,
     connect,
+    destroy,
     on,
     off,
   };

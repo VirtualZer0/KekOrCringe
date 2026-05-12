@@ -26,7 +26,12 @@
       class="rate-variant"
       :ref="(el) => (variantRefs[variant.name] = el)"
       v-for="(variant, num) in store.variantsSettings.filter(
-        (v) => !v.permanent
+        (v) =>
+          !v.permanent &&
+          v.name &&
+          v.name.trim() &&
+          v.name !== 'kek' &&
+          v.name !== 'cringe'
       )"
       :key="num"
       :style="{

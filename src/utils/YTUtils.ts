@@ -41,26 +41,27 @@ export interface IVideoDataResult {
   video?: IVideoData;
 }
 
-export const getYTVideoId = (url: any) => {
-  url = url.split(/(vi\/|v%3D|v=|\/v\/|youtu\.be\/|\/embed\/)/);
-  return undefined !== url[2] ? url[2].split(/[^0-9a-z_\-]/i)[0] : url[0];
+export const getYTVideoId = (url: any): string | null => {
+  if (typeof url !== 'string') return null;
+  const parts = url.split(/(vi\/|v%3D|v=|\/v\/|youtu\.be\/|\/embed\/)/i);
+  if (parts.length < 3) return null;
+  const id = parts[2].split(/[^0-9a-z_\-]/i)[0];
+  return id || null;
 };
 
-export const getYTLink = (msg: string) => {
-  const res = getUrlFromString(msg);
-  if (res != null) {
-    msg = res[0];
+const ytHostRegex = /^https?:\/\/(www\.|m\.)?(youtube\.com|youtu\.be)\//i;
+
+export const getYTLink = (msg: string): string | null => {
+  const matches = getUrlFromString(msg);
+  const candidates = matches != null ? matches : [msg];
+
+  for (const candidate of candidates) {
+    const link = candidate.split(' ')[0];
+    if (ytHostRegex.test(link) && getYTVideoId(link)) {
+      return link;
+    }
   }
-  if (
-    msg.startsWith('https://youtube.com') ||
-    msg.startsWith('https://youtu.be/') ||
-    msg.startsWith('https://www.youtu.be/') ||
-    msg.startsWith('https://www.youtube.com')
-  ) {
-    return msg.split(' ')[0];
-  } else {
-    return null;
-  }
+  return null;
 };
 
 export const getVideoStats = async (
@@ -76,35 +77,47 @@ export const getVideoStats = async (
     .join('');
 
   const id = getYTVideoId(url);
-  const res = await (
-    await fetch(
-      `https://www.googleapis.com/youtube/v3/videos?part=contentDetails&part=statistics&part=snippet&part=status&id=${id}&key=${realApiKey}`
-    )
-  ).json();
+  if (!id) return { err: 'invalidUrl' };
 
-  if (!options.bypassChecks && !res.items[0].status.embeddable)
+  let res: any;
+  try {
+    const response = await fetch(
+      `https://www.googleapis.com/youtube/v3/videos?part=contentDetails&part=statistics&part=snippet&part=status&id=${id}&key=${realApiKey}`
+    );
+    if (!response.ok) return { err: 'apiError' };
+    res = await response.json();
+  } catch {
+    return { err: 'apiError' };
+  }
+
+  const item = res?.items?.[0];
+  if (!item) return { err: 'apiError' };
+
+  if (!options.bypassChecks && !item.status?.embeddable)
     return { err: 'notEmbeddable' };
 
   if (!options.bypassChecks && options.filterBadwords) {
-    badWords.forEach((word) => {
-      if (res.items[0].snippet.title.includes(word)) {
-        return { err: 'badWords' };
-      }
-    });
+    const titleLower = (item.snippet?.title ?? '').toLowerCase();
+    if (badWords.some((word) => titleLower.includes(word.toLowerCase()))) {
+      return { err: 'badWords' };
+    }
   }
 
   return {
     video: {
       id,
       user,
-      title: res.items[0].snippet.title,
-      viewCount: parseInt(res.items[0].statistics.viewCount),
-      publishedAt: new Date(res.items[0].snippet.publishedAt).getTime(),
-      preview: res.items[0].snippet.thumbnails.high.url,
-      duration: durationToSeconds(res.items[0].contentDetails.duration),
+      title: item.snippet?.title ?? '',
+      viewCount: parseInt(item.statistics?.viewCount) || 0,
+      publishedAt: item.snippet?.publishedAt
+        ? new Date(item.snippet.publishedAt).getTime()
+        : 0,
+      preview: item.snippet?.thumbnails?.high?.url ?? '',
+      duration: item.contentDetails?.duration
+        ? durationToSeconds(item.contentDetails.duration)
+        : 0,
       restricted:
-        res.items[0].contentDetails.contentRating?.ytRating ==
-        'ytAgeRestricted',
+        item.contentDetails?.contentRating?.ytRating == 'ytAgeRestricted',
     },
   };
 };

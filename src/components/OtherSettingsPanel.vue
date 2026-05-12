@@ -18,6 +18,7 @@
         :label="$t('settings.clearStatistic')"
         severity="warning"
         icon="pi pi-chart-bar"
+        @click="clearStatistic"
       />
       <Button
         :label="$t('settings.resetSettings')"
@@ -65,6 +66,25 @@ const resetSettings = (ev: Event) => {
   });
 };
 
+const clearStatistic = (ev: Event) => {
+  confirm.require({
+    target: ev.currentTarget as HTMLElement,
+    message: t('settings.clearStatisticConfirm'),
+    icon: 'pi pi-exclamation-triangle',
+    acceptLabel: t('settings.yes'),
+    rejectLabel: t('settings.no'),
+    accept: () => {
+      localStorage.removeItem('statistics');
+      toast.add({
+        severity: 'warn',
+        detail: t('settings.clearStatisticDone'),
+        summary: t('settings.clearStatistic'),
+        life: 3000,
+      });
+    },
+  });
+};
+
 const exportSettings = () => {
   const blob = new Blob([JSON.stringify(store.$state)], {
     type: 'application/json;charset=utf-8',
@@ -101,7 +121,39 @@ const importSettings = () => {
           try {
             const content = (readerEvent.target as FileReader).result;
             store.$reset();
+
+            // Snapshot defaults so we can restore kek/cringe if the import drops them
+            const defaultKek = JSON.parse(
+              JSON.stringify(
+                store.variantsSettings.find((v) => v.name === 'kek')
+              )
+            );
+            const defaultCringe = JSON.parse(
+              JSON.stringify(
+                store.variantsSettings.find((v) => v.name === 'cringe')
+              )
+            );
+
             store.$patch(JSON.parse(content as string));
+
+            // Enforce permanent invariants for kek/cringe regardless of import shape
+            const kekEntry = store.variantsSettings.find(
+              (v) => v.name === 'kek'
+            );
+            const cringeEntry = store.variantsSettings.find(
+              (v) => v.name === 'cringe'
+            );
+            if (kekEntry) {
+              kekEntry.permanent = true;
+            } else if (defaultKek) {
+              store.variantsSettings.unshift(defaultKek);
+            }
+            if (cringeEntry) {
+              cringeEntry.permanent = true;
+            } else if (defaultCringe) {
+              store.variantsSettings.push(defaultCringe);
+            }
+
             toast.add({
               detail: t('settings.importSettingsDone'),
               summary: t('settings.importSettings'),

@@ -55,7 +55,7 @@
           }"
         >
           <div class="launch-block" v-if="!currentVote.videoId">
-            Ожидаем появления видео
+            {{ $t('videoWait') }}
           </div>
           <YouTube
             v-show="currentVote.videoId"
@@ -79,6 +79,7 @@
             <Button
               icon="pi pi-fast-forward"
               class="next-button"
+              :disabled="!currentVote.isActive"
               @click="launchResult()"
             />
             <Badge
@@ -100,7 +101,6 @@
 </template>
 
 <script setup lang="ts">
-import { TUserData } from '@/types/TUserData';
 import {
   getVideoStats,
   getYTLink,
@@ -263,10 +263,7 @@ const statistics = ref(getStatistics());
 statistics.value.current = createEmptyStatBlock();
 localStorage['statistics'] = JSON.stringify(statistics.value);
 
-const users = ref<Record<string, TUserData>>({});
-if (localStorage.getItem('users')) {
-  users.value = JSON.parse(localStorage.getItem('users') as string);
-}
+const pendingVideoIds = new Set<string>();
 
 /** Check user message and add video or vote */
 const handleUserMessage = async (
@@ -279,43 +276,49 @@ const handleUserMessage = async (
     const vid = getYTLink(msg);
     if (vid) {
       const id = getYTVideoId(vid);
+      if (!id) return;
 
       if (Object.keys(videoList.value).length >= store.videoSettings.queueSize)
         return showErrToast(`${user}: ${t('queueIsFull')}`);
 
-      if (videoList.value[id])
+      if (videoList.value[id] || pendingVideoIds.has(id))
         return showErrToast(`${user}: ${t('alreadyExistsVideo')}`);
 
-      const data = await getVideoStats(vid, user, {
-        filterBadwords: store.videoSettings.banwordsFilter,
-      });
+      pendingVideoIds.add(id);
+      try {
+        const data = await getVideoStats(vid, user, {
+          filterBadwords: store.videoSettings.banwordsFilter,
+        });
 
-      if (data.err) {
-        const err = t(`${data.err}Video`);
-        showErrToast(`${user}: ${err}`);
+        if (data.err) {
+          const err = t(`${data.err}Video`);
+          return showErrToast(`${user}: ${err}`);
+        }
+
+        if (
+          (data.video?.duration as number) >
+          store.videoSettings.durationTo * 60
+        )
+          return showErrToast(`${user}: ${t('tooLongVideo')}`);
+
+        if (
+          (data.video?.duration as number) <
+          store.videoSettings.durationFrom * 60
+        )
+          return showErrToast(`${user}: ${t('tooShortVideo')}`);
+
+        if ((data.video?.viewCount as number) < store.videoSettings.viewCount)
+          return showErrToast(`${user}: ${t('notEnoughViewsVideo')}`);
+
+        return addVideoToList(data.video as IVideoData);
+      } finally {
+        pendingVideoIds.delete(id);
       }
-
-      if (
-        (data.video?.duration as number) >
-        store.videoSettings.durationTo * 60
-      )
-        return showErrToast(`${user}: ${t('tooLongVideo')}`);
-
-      if (
-        (data.video?.duration as number) <
-        store.videoSettings.durationFrom * 60
-      )
-        return showErrToast(`${user}: ${t('tooShortVideo')}`);
-
-      if ((data.video?.viewCount as number) < store.videoSettings.viewCount)
-        return showErrToast(`${user}: ${t('notEnoughViewsVideo')}`);
-
-      return addVideoToList(data.video as IVideoData);
     }
   }
 
   const foundedVariant = store.variantsSettings.find((v) =>
-    v.words.find((w) => w.name.toLowerCase() == msg.toLowerCase())
+    v.words.find((w) => w?.name && w.name.toLowerCase() == msg.toLowerCase())
   );
 
   if (foundedVariant) {
@@ -326,12 +329,6 @@ const handleUserMessage = async (
 /** Add new video to queue */
 const addVideoToList = (video: IVideoData) => {
   videoList.value[video.id] = video;
-  if (!users.value[video.user]) {
-    users.value[video.user] = {
-      requests: {},
-      votes: {},
-    };
-  }
 
   if (!currentVote.value.videoId) {
     setActiveVideo(video.id);
@@ -351,28 +348,31 @@ const setActiveVideo = (videoId: string | null) => {
   );
 };
 
+let resultTimer: number | null = null;
+
 /** Launch final rate animation */
 const launchResult = () => {
+  if (!currentVote.value.isActive) return;
   currentVote.value.isActive = false;
   statistics.value.allTime.allVideos++;
   statistics.value.current.allVideos++;
 
-  let winner: string | null = null;
-
-  if (
-    currentVote.value.votes['kek'].length ==
-      currentVote.value.votes['cringe'].length &&
-    !Object.entries(currentVote.value.votes)
+  const kekCount = currentVote.value.votes['kek']?.length ?? 0;
+  const cringeCount = currentVote.value.votes['cringe']?.length ?? 0;
+  const maxCustomCount = Math.max(
+    0,
+    ...Object.entries(currentVote.value.votes)
       .filter((pair) => pair[0] != 'kek' && pair[0] != 'cringe')
-      .some((pair) => pair[1].length > currentVote.value.votes['cringe'].length)
-  ) {
+      .map((pair) => pair[1].length)
+  );
+
+  let winner: string;
+  if (kekCount === cringeCount && maxCustomCount <= cringeCount) {
     winner = 'neutral';
-  } else if (currentVote.value.skipCount <= 0) {
-    winner = 'cringe';
   } else {
-    winner = Object.entries(currentVote.value.votes).sort((a, b) => {
-      return b[1].length - a[1].length;
-    })[0][0];
+    winner = Object.entries(currentVote.value.votes).sort(
+      (a, b) => b[1].length - a[1].length
+    )[0][0];
   }
 
   result.value.rate = winner;
@@ -384,10 +384,8 @@ const launchResult = () => {
       !Object.entries(currentVote.value.votes)
         .filter((pair) => pair[0] != 'kek' && pair[0] != 'cringe')
         .some((pair) => pair[1].length > 0) &&
-      (currentVote.value.votes['kek'].length == 0 ||
-        currentVote.value.votes['cringe'].length == 0) &&
-      currentVote.value.votes['kek'].length !=
-        currentVote.value.votes['cringe'].length
+      (kekCount == 0 || cringeCount == 0) &&
+      kekCount != cringeCount
     ) {
       result.value.strong = true;
     } else {
@@ -397,7 +395,8 @@ const launchResult = () => {
 
   result.value.show = true;
 
-  setTimeout(() => {
+  if (resultTimer !== null) clearTimeout(resultTimer);
+  resultTimer = window.setTimeout(() => {
     result.value.show = false;
     removeVideoFromList(currentVote.value.videoId ?? '');
     if (Object.keys(videoList.value).length > 0) {
@@ -405,6 +404,7 @@ const launchResult = () => {
     } else {
       setActiveVideo(null);
     }
+    resultTimer = null;
   }, 3700);
 };
 
@@ -494,6 +494,11 @@ onBeforeUnmount(() => {
   chat.off('Bits', tryUseBits);
   chat.off('Reward', tryUseReward);
   chat.off('Message', tryUseMessage);
+  chat.destroy();
+  if (resultTimer !== null) {
+    clearTimeout(resultTimer);
+    resultTimer = null;
+  }
   window.removeEventListener('resize', resizePlayer);
 });
 </script>

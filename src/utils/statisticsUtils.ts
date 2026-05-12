@@ -8,24 +8,32 @@ export const createEmptyStatBlock = () => ({
   allVideos: 0,
 });
 
-export const getStatistics = (clearCurrent = true) => {
-  if (localStorage.getItem('statistics')) {
-    const stats = JSON.parse(localStorage.getItem('statistics') as string);
-    if (clearCurrent) {
-      stats.current = createEmptyStatBlock();
-    }
-    return stats;
-  } else {
-    const statistics = {
-      allTime: {
-        ...createEmptyStatBlock(),
-      },
-      current: {
-        ...createEmptyStatBlock(),
-      },
-    };
+const normalizeBlock = (block: any) => ({
+  ...createEmptyStatBlock(),
+  ...(block && typeof block === 'object' ? block : {}),
+});
 
-    localStorage.setItem('statistics', JSON.stringify(statistics));
-    return statistics;
+export const getStatistics = (clearCurrent = true) => {
+  const raw = localStorage.getItem('statistics');
+  if (raw) {
+    try {
+      const parsed = JSON.parse(raw);
+      return {
+        allTime: normalizeBlock(parsed?.allTime),
+        current: clearCurrent
+          ? createEmptyStatBlock()
+          : normalizeBlock(parsed?.current),
+      };
+    } catch {
+      // Fall through and rebuild a clean statistics object
+    }
   }
+
+  const statistics = {
+    allTime: createEmptyStatBlock(),
+    current: createEmptyStatBlock(),
+  };
+
+  localStorage.setItem('statistics', JSON.stringify(statistics));
+  return statistics;
 };

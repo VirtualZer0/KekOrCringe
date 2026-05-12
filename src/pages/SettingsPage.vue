@@ -48,29 +48,35 @@ const store = useStore();
 const toast = useToast();
 const { t } = useI18n();
 
-const videoSettings = ref({ ...store.videoSettings });
-const variantsSettings = ref([...store.variantsSettings]);
+const videoSettings = ref(JSON.parse(JSON.stringify(store.videoSettings)));
+const variantsSettings = ref(
+  JSON.parse(JSON.stringify(store.variantsSettings))
+);
 
 const loadBasicData = async () => {
-  const rewardsReq = await getTwitchRewards(store.channel);
-  if (
-    Array.isArray(rewardsReq) &&
-    rewardsReq.length > 0 &&
-    rewardsReq[0]?.data?.community?.channel?.id != null
-  ) {
-    store.setTwitchId(rewardsReq[0]?.data?.community?.channel?.id);
-
+  try {
+    const rewardsReq = await getTwitchRewards(store.channel);
     if (
-      rewardsReq[0]?.data?.community?.channel?.communityPointsSettings
-        ?.customRewards?.length > 0
+      Array.isArray(rewardsReq) &&
+      rewardsReq.length > 0 &&
+      rewardsReq[0]?.data?.community?.channel?.id != null
     ) {
-      store.setRewards(
-        rewardsReq[0].data.community.channel.communityPointsSettings
-          .customRewards
-      );
-    }
+      store.setTwitchId(rewardsReq[0]?.data?.community?.channel?.id);
 
-    store.save();
+      if (
+        rewardsReq[0]?.data?.community?.channel?.communityPointsSettings
+          ?.customRewards?.length > 0
+      ) {
+        store.setRewards(
+          rewardsReq[0].data.community.channel.communityPointsSettings
+            .customRewards
+        );
+      }
+
+      store.save();
+    }
+  } catch (e) {
+    console.error(e);
   }
 };
 
@@ -94,7 +100,9 @@ const loadBttvEmotes = async () => {
       name: 'bttv',
       value: emotes.map((emote) => ({
         name: emote.code.toLowerCase(),
-        url: `https://cdn.betterttv.net/emote/${emote.id}/2x.${emote.imageType}`,
+        url: `https://cdn.betterttv.net/emote/${emote.id}/2x.${
+          emote.imageType ?? 'webp'
+        }`,
       })),
     });
   } catch (e) {
@@ -110,16 +118,19 @@ const loadBttvEmotes = async () => {
 const loadStvEmotes = async () => {
   try {
     const result = await (
-      await fetch(`https://api.7tv.app/v2/users/${store.twitchId}/emotes`)
+      await fetch(`https://7tv.io/v3/users/twitch/${store.twitchId}`)
     ).json();
 
-    if (Array.isArray(result)) {
+    const emotes = result?.emote_set?.emotes;
+    if (Array.isArray(emotes)) {
       store.setEmotes({
         name: 'stv',
-        value: result.map((emote) => ({
-          name: emote.name.toLowerCase(),
-          url: emote.urls.length > 1 ? emote.urls[1][1] : emote.urls[0][1],
-        })),
+        value: emotes
+          .filter((emote: any) => emote?.id && emote?.name)
+          .map((emote: any) => ({
+            name: emote.name.toLowerCase(),
+            url: `https://cdn.7tv.app/emote/${emote.id}/2x.webp`,
+          })),
       });
     }
   } catch (e) {
@@ -163,8 +174,8 @@ const loadFfzEmotes = async () => {
 };
 
 const saveSettings = () => {
-  store.setVideoSettings(videoSettings as any);
-  store.setVariantsSettings(variantsSettings as any);
+  store.setVideoSettings(videoSettings.value);
+  store.setVariantsSettings(variantsSettings.value);
   store.save();
 };
 

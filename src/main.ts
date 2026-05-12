@@ -27,14 +27,15 @@ const i18n = createI18n({
 
 const pinia = createPinia();
 
-createApp(App)
+const app = createApp(App)
   .use(router)
   .use(i18n)
   .use(pinia)
   .use(PrimeVue)
   .use(ConfirmationService)
-  .use(ToastService)
-  .mount('#app');
+  .use(ToastService);
 
 const store = useStore();
 store.load();
+
+app.mount('#app');

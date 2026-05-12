@@ -80,9 +80,12 @@
             <Button
               class="save-trigger small-height"
               icon="pi pi-check"
+              :disabled="!newVariant[num]?.name"
               @click="
-                variant.words.push(newVariant[num]);
-                newVariant[num] = { name: '' };
+                if (newVariant[num]?.name) {
+                  variant.words.push(newVariant[num]);
+                  newVariant[num] = { name: '' };
+                }
               "
             />
           </div>

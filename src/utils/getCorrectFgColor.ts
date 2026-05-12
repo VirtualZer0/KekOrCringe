@@ -12,7 +12,7 @@ export const getCorrectFgColor = (hex: string, bw = true) => {
     hex = hex[0] + hex[0] + hex[1] + hex[1] + hex[2] + hex[2];
   }
   if (hex.length !== 6) {
-    throw new Error('Invalid HEX color.');
+    return '#FFFFFF';
   }
   let r: any = parseInt(hex.slice(0, 2), 16),
     g: any = parseInt(hex.slice(2, 4), 16),

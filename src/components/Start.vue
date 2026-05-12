@@ -24,7 +24,7 @@ import InputText from 'primevue/inputtext';
 import Button from 'primevue/button';
 import Dialog from 'primevue/dialog';
 import { useI18n } from 'vue-i18n';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { useToast } from 'primevue/usetoast';
 import { useStore } from '@/store';
 
@@ -34,8 +34,15 @@ const toast = useToast();
 const { t } = useI18n();
 const store = useStore();
 
-const url = ref('');
-const showFirstTime = ref(false);
+const url = ref(store.channel);
+const showFirstTime = ref(store.firstTime);
+
+watch(showFirstTime, (open) => {
+  if (!open && store.firstTime) {
+    store.setFirstTime(false);
+    store.save();
+  }
+});
 
 const showErr = () => {
   toast.add({
@@ -46,27 +53,37 @@ const showErr = () => {
   });
 };
 
-const start = () => {
-  if (url.value.includes('https://') || url.value.includes('/')) {
-    const filteredName = url.value.replace(/\/$/, '').split('/').pop();
-    if (filteredName) {
-      store.setChannel(filteredName);
-    } else {
-      showErr();
-      return;
+const extractChannel = (input: string): string | null => {
+  const trimmed = input.trim();
+  if (!trimmed) return null;
+
+  if (trimmed.includes('/')) {
+    try {
+      const parsed = new URL(
+        /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`
+      );
+      const segment = parsed.pathname.split('/').filter(Boolean)[0];
+      return segment ? segment.toLowerCase() : null;
+    } catch {
+      const parts = trimmed.replace(/\/$/, '').split('/').filter(Boolean);
+      return parts.length > 0 ? parts[parts.length - 1].toLowerCase() : null;
     }
-  } else if (url.value) {
-    store.setChannel(url.value);
-  } else {
+  }
+
+  return trimmed.toLowerCase();
+};
+
+const start = () => {
+  const channel = extractChannel(url.value);
+  if (!channel) {
     showErr();
     return;
   }
 
+  store.setChannel(channel);
   store.save();
   emits('start', '/settings');
 };
-
-url.value = store.channel;
 </script>
 
 <style lang="scss" scoped>

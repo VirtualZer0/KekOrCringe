@@ -51,9 +51,7 @@
           v-if="selectedReward"
           alt="reward"
           :src="
-            selectedReward.image
-              ? selectedReward.image.url
-              : selectedReward.defaultImage.url
+            selectedReward.image?.url ?? selectedReward.defaultImage?.url ?? ''
           "
         />
         <div>
