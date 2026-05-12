@@ -476,9 +476,50 @@ const tryUseReward = async (user: string, msg: string, rewardId: string) => {
 const tryUseMessage = async (user: string, msg: string) =>
   await handleUserMessage('message', user, msg);
 
+const onChatConnected = () => {
+  toast.add({
+    severity: 'success',
+    summary: t('chatConnected'),
+    life: 2500,
+  });
+};
+
+const onChatError = (message: string) => {
+  toast.add({
+    severity: 'error',
+    summary: t('chatError'),
+    detail: message,
+    life: 5000,
+  });
+};
+
 chat.on('Bits', tryUseBits);
 chat.on('Reward', tryUseReward);
 chat.on('Message', tryUseMessage);
+chat.on('Connected', onChatConnected);
+chat.on('Error', onChatError);
+
+const validateRewardSetting = () => {
+  if (store.videoSettings.addVideoMethod !== 'reward') return;
+  const selectedId = store.videoSettings.selectedRewardId;
+  if (!selectedId) {
+    toast.add({
+      severity: 'warn',
+      summary: t('warning'),
+      detail: t('rewardNotSelected'),
+      life: 5000,
+    });
+    return;
+  }
+  if (!store.rewardsCache.find((r) => r.id === selectedId)) {
+    toast.add({
+      severity: 'warn',
+      summary: t('warning'),
+      detail: t('rewardNotFound'),
+      life: 5000,
+    });
+  }
+};
 
 onMounted(() => {
   resizePlayer();
@@ -487,6 +528,8 @@ onMounted(() => {
   store.variantsSettings.forEach((v) => {
     currentVote.value.votes[v.name] = [];
   });
+
+  validateRewardSetting();
 
   chat.create(store.channel);
   chat.connect();
@@ -500,6 +543,8 @@ onBeforeUnmount(() => {
   chat.off('Bits', tryUseBits);
   chat.off('Reward', tryUseReward);
   chat.off('Message', tryUseMessage);
+  chat.off('Connected', onChatConnected);
+  chat.off('Error', onChatError);
   chat.destroy();
   if (resultTimer !== null) {
     clearTimeout(resultTimer);

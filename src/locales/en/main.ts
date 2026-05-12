@@ -7,6 +7,13 @@ export default {
   firstTimeTitle: 'First time?',
   firstTimeText: "It's a good time to set things up!",
   error: 'Error',
+  warning: 'Warning',
+  chatConnected: 'Connected to chat',
+  chatError: 'Chat error',
+  rewardNotSelected:
+    'No reward selected — reward redemptions will be ignored. Open settings to pick one.',
+  rewardNotFound:
+    'The selected reward no longer exists on the channel. Open settings to pick another.',
   nameErr:
     'Your name does not seem to be entered correctly. Enter the name of the channel or a full link to it.',
   settings: {

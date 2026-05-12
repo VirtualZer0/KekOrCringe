@@ -5,15 +5,25 @@ const events: {
   onReward: ((user: string, msg: string, rewardId: string) => void)[];
   onMessage: ((user: string, msg: string) => void)[];
   onBits: ((user: string, msg: string, count: number) => void)[];
+  onConnected: (() => void)[];
+  onError: ((message: string) => void)[];
 } = {
   onReward: [],
   onMessage: [],
   onBits: [],
+  onConnected: [],
+  onError: [],
 };
 
 export const useChat = () => {
   const connect = async () => {
-    if (!connected) await chat?.connect();
+    if (connected) return;
+    try {
+      await chat?.connect();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      events.onError.forEach((ev) => ev(message));
+    }
   };
 
   const disposeCurrent = () => {
@@ -38,7 +48,10 @@ export const useChat = () => {
       channels: [channel],
     });
 
-    chat.on('connected', () => (connected = true));
+    chat.on('connected', () => {
+      connected = true;
+      events.onConnected.forEach((ev) => ev());
+    });
 
     chat.on('message', (ch, context, message) => {
       if (context['custom-reward-id']) {
@@ -66,8 +79,10 @@ export const useChat = () => {
       );
     });
 
-    chat.on('disconnected', () => {
+    chat.on('disconnected', (reason) => {
       connected = false;
+      const detail = reason ? String(reason) : 'unknown reason';
+      events.onError.forEach((ev) => ev(detail));
       setTimeout(connect, 500);
     });
   };
@@ -77,14 +92,14 @@ export const useChat = () => {
   };
 
   const on = (
-    type: 'Reward' | 'Message' | 'Bits',
+    type: 'Reward' | 'Message' | 'Bits' | 'Connected' | 'Error',
     cb: (...args: any) => void,
   ) => {
     events[`on${type}`].push(cb);
   };
 
   const off = (
-    type: 'Reward' | 'Message' | 'Bits',
+    type: 'Reward' | 'Message' | 'Bits' | 'Connected' | 'Error',
     cb: (...args: any) => void,
   ) => {
     const index = events[`on${type}`].indexOf(cb);
