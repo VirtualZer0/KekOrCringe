@@ -1,16 +1,16 @@
 <template>
-  <Sidebar
+  <Drawer
     class="queue-sidebar"
     :visible="props.visible"
-    @update:visible="emits('close')"
     :style="{ width: '25vw', minWidth: '460px' }"
+    @update:visible="emits('close')"
   >
     <h2>{{ $t('videoQueue') }}</h2>
     <div class="queue-list">
       <div
-        class="queue-item"
         v-for="video in props.queue"
         :key="video.id"
+        class="queue-item"
         :class="{
           current: video.id == props.currentPlaying,
         }"
@@ -51,12 +51,12 @@
         {{ $t('clearAllQueue') }}
       </div>
     </div>
-  </Sidebar>
+  </Drawer>
 </template>
 <script lang="ts" setup>
 import { IVideoData } from '@/utils/YTUtils';
 import Button from 'primevue/button';
-import Sidebar from 'primevue/sidebar';
+import Drawer from 'primevue/drawer';
 import { PropType } from 'vue';
 
 const emits = defineEmits(['close', 'remove', 'clear']);
@@ -78,7 +78,7 @@ const props = defineProps({
   },
 });
 </script>
-<style lang="scss" scoped>
+<style scoped>
 .queue-list {
   h2 {
     margin-top: 0;

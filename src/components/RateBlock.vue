@@ -4,8 +4,8 @@
     :class="{ inactive: !props.isActive }"
   >
     <Button
-      class="rate-variant"
       :ref="(el) => (variantRefs['kek'] = el)"
+      class="rate-variant"
       :style="{
         backgroundColor: '#2a9d8f',
         borderColor: '#2a9d8f',
@@ -23,17 +23,17 @@
       <div class="count">{{ votes['kek']?.length }}</div>
     </Button>
     <Button
-      class="rate-variant"
-      :ref="(el) => (variantRefs[variant.name] = el)"
       v-for="(variant, num) in store.variantsSettings.filter(
         (v) =>
           !v.permanent &&
           v.name &&
           v.name.trim() &&
           v.name !== 'kek' &&
-          v.name !== 'cringe'
+          v.name !== 'cringe',
       )"
+      :ref="(el) => (variantRefs[variant.name] = el)"
       :key="num"
+      class="rate-variant"
       :style="{
         backgroundColor: variant.color,
         borderColor: variant.color,
@@ -44,7 +44,7 @@
     >
       <img
         v-if="variantEmote[variant.name]"
-        :src="(variantEmote[variant.name] as string)"
+        :src="variantEmote[variant.name] as string"
         width="42"
         height="42"
       />
@@ -52,8 +52,8 @@
       <div class="count">{{ votes[variant.name]?.length }}</div>
     </Button>
     <Button
-      class="rate-variant"
       :ref="(el) => (variantRefs['cringe'] = el)"
+      class="rate-variant"
       :style="{
         backgroundColor: '#e76f51',
         borderColor: '#e76f51',
@@ -111,7 +111,7 @@ onBeforeUpdate(() => {
 
 onUpdated(() => emits('init', variantRefs));
 </script>
-<style lang="scss" scoped>
+<style scoped>
 .rate-block {
   position: fixed;
   width: 100vw;

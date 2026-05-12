@@ -67,7 +67,7 @@ export const getYTLink = (msg: string): string | null => {
 export const getVideoStats = async (
   url: string,
   user: string,
-  options: { bypassChecks?: boolean; filterBadwords: boolean }
+  options: { bypassChecks?: boolean; filterBadwords: boolean },
 ): Promise<IVideoDataResult> => {
   const realApiKey = apiKey
     .replaceAll('@', 'a')
@@ -82,7 +82,7 @@ export const getVideoStats = async (
   let res: any;
   try {
     const response = await fetch(
-      `https://www.googleapis.com/youtube/v3/videos?part=contentDetails&part=statistics&part=snippet&part=status&id=${id}&key=${realApiKey}`
+      `https://www.googleapis.com/youtube/v3/videos?part=contentDetails&part=statistics&part=snippet&part=status&id=${id}&key=${realApiKey}`,
     );
     if (!response.ok) return { err: 'apiError' };
     res = await response.json();

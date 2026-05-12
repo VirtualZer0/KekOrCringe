@@ -4,13 +4,13 @@
       <h1>{{ $t('settings.title') }}</h1>
       <div class="settings-container">
         <VideoSettingsPanel
-          :videoSettingsIn="videoSettings"
+          :video-settings-in="videoSettings"
           @change="videoSettings = $event"
         />
       </div>
       <div class="settings-container">
         <VariantsSettingsPanel
-          :variantsSettingsIn="variantsSettings"
+          :variants-settings-in="variantsSettings"
           @change="variantsSettings = $event"
         />
       </div>
@@ -50,7 +50,7 @@ const { t } = useI18n();
 
 const videoSettings = ref(JSON.parse(JSON.stringify(store.videoSettings)));
 const variantsSettings = ref(
-  JSON.parse(JSON.stringify(store.variantsSettings))
+  JSON.parse(JSON.stringify(store.variantsSettings)),
 );
 
 const loadBasicData = async () => {
@@ -69,7 +69,7 @@ const loadBasicData = async () => {
       ) {
         store.setRewards(
           rewardsReq[0].data.community.channel.communityPointsSettings
-            .customRewards
+            .customRewards,
         );
       }
 
@@ -84,7 +84,7 @@ const loadBttvEmotes = async () => {
   try {
     const result = await (
       await fetch(
-        `https://api.betterttv.net/3/cached/users/twitch/${store.twitchId}`
+        `https://api.betterttv.net/3/cached/users/twitch/${store.twitchId}`,
       )
     ).json();
     const emotes = [];
@@ -193,7 +193,7 @@ onMounted(async () => {
 });
 </script>
 
-<style lang="scss" scoped>
+<style scoped>
 .settings-page {
   width: calc(100vw - 8px);
   min-height: 100vh;

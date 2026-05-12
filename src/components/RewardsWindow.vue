@@ -1,16 +1,16 @@
 <template>
   <Dialog
     :visible="props.visible"
-    @update:visible="emit('close')"
     modal
     :header="$t('settings.selectReward')"
     :style="{ width: '60vw' }"
+    @update:visible="emit('close')"
   >
     <div class="rewards">
       <Button
-        class="reward"
         v-for="reward in store.rewardsCache"
         :key="reward.id"
+        class="reward"
         :style="getRewardStyle(reward)"
         @click="emit('select', reward.id)"
       >
@@ -41,7 +41,7 @@ const props = defineProps({
 
 const store = useStore();
 </script>
-<style lang="scss" scoped>
+<style scoped>
 .rewards {
   display: flex;
   flex-wrap: wrap;

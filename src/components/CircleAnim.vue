@@ -21,7 +21,7 @@ defineProps({
   },
 });
 </script>
-<style lang="scss">
+<style>
 .circle-anim {
   position: fixed;
   top: 0;
@@ -45,17 +45,17 @@ defineProps({
     will-change: width, height;
     backface-visibility: hidden;
   }
+}
 
-  @keyframes circle-appear {
-    0% {
-      height: 0;
-      width: 0;
-    }
+@keyframes circle-appear {
+  0% {
+    height: 0;
+    width: 0;
+  }
 
-    100% {
-      height: 150vmax;
-      width: 150vmax;
-    }
+  100% {
+    height: 150vmax;
+    width: 150vmax;
   }
 }
 </style>

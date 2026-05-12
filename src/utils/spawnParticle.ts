@@ -1,7 +1,7 @@
 export const spawnRandomParticle = (
   classes: string[] = [],
   container: HTMLElement,
-  duration = 3
+  duration = 3,
 ): HTMLElement => {
   const particle = document.createElement('div');
   particle.classList.add('particle');

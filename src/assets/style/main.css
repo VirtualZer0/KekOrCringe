@@ -21,17 +21,17 @@ body {
 
 .p-divider {
   height: 1px;
-  background: var(--surface-300);
+  background: var(--p-surface-300);
 }
 
-.p-sidebar-header {
+.p-drawer-header {
   position: fixed;
   right: 0;
   top: 0;
   z-index: 10;
 }
 
-.p-sidebar-content {
+.p-drawer-content {
   margin-top: 4px;
 }
 

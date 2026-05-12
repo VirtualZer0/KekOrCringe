@@ -1,9 +1,9 @@
 <template>
   <div class="start">
     <InputText
+      v-model="url"
       class="p-inputtext-lg input"
       :placeholder="$t('twitchUrl')"
-      v-model="url"
       @keypress.enter="start()"
     />
     <Button @click="start()">{{ $t('start') }}</Button>
@@ -60,7 +60,7 @@ const extractChannel = (input: string): string | null => {
   if (trimmed.includes('/')) {
     try {
       const parsed = new URL(
-        /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`
+        /^https?:\/\//i.test(trimmed) ? trimmed : `https://${trimmed}`,
       );
       const segment = parsed.pathname.split('/').filter(Boolean)[0];
       return segment ? segment.toLowerCase() : null;
@@ -86,7 +86,7 @@ const start = () => {
 };
 </script>
 
-<style lang="scss" scoped>
+<style scoped>
 .start {
   display: flex;
   justify-content: center;

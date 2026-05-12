@@ -5,7 +5,7 @@
     <div class="right text-xxl">{{ $t('cringe').toUpperCase() }}</div>
   </div>
 </template>
-<style lang="scss" scoped>
+<style scoped>
 .logo {
   padding-top: 100px;
   user-select: none;
@@ -20,9 +20,16 @@
     font-family: 'Courier New', Courier, monospace;
     z-index: 2;
     font-weight: bold;
-    text-shadow: 1px 1px 1px #919191, 1px 2px 1px #919191, 1px 3px 1px #919191,
-      1px 4px 1px #919191, 1px 5px 1px #919191, 1px 6px 1px #919191,
-      1px 7px 1px #919191, 1px 8px 1px #919191, 1px 9px 1px #919191,
+    text-shadow:
+      1px 1px 1px #919191,
+      1px 2px 1px #919191,
+      1px 3px 1px #919191,
+      1px 4px 1px #919191,
+      1px 5px 1px #919191,
+      1px 6px 1px #919191,
+      1px 7px 1px #919191,
+      1px 8px 1px #919191,
+      1px 9px 1px #919191,
       1px 10px 1px #919191;
 
     animation: drop-from-above 0.3s ease-in backwards;
@@ -48,25 +55,25 @@
     font-family: 'Segoe Script';
     z-index: 0;
   }
+}
 
-  @keyframes drop-from-above {
-    0% {
-      transform: translateY(-450px);
-    }
-
-    100% {
-      transform: translateY(0);
-    }
+@keyframes drop-from-above {
+  0% {
+    transform: translateY(-450px);
   }
 
-  @keyframes fade-in {
-    0% {
-      transform: scale(0);
-    }
+  100% {
+    transform: translateY(0);
+  }
+}
 
-    100% {
-      transform: scale(1);
-    }
+@keyframes fade-in {
+  0% {
+    transform: scale(0);
+  }
+
+  100% {
+    transform: scale(1);
   }
 }
 </style>

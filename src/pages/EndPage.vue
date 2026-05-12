@@ -3,9 +3,9 @@
     <h1>{{ $t('statistics') }}</h1>
 
     <div
+      ref="winnerContainer"
       class="winner"
       :class="winner"
-      ref="winnerContainer"
     >
       <span class="title">{{ $t(`${winner}WinnerTitle`) }}</span>
       <span
@@ -26,8 +26,8 @@
       <div class="item">
         <h2 class="item-title">{{ $t('today') }}</h2>
         <div
-          class="item-video"
           v-if="statistics.current.mostKekVideo"
+          class="item-video"
         >
           <div class="preview-container">
             <div class="stats">
@@ -58,8 +58,8 @@
       <div class="item">
         <h2 class="item-title">{{ $t('allTime') }}</h2>
         <div
-          class="item-video"
           v-if="statistics.allTime.mostKekVideo"
+          class="item-video"
         >
           <div class="preview-container">
             <div class="stats">
@@ -93,8 +93,8 @@
       <div class="item">
         <h2 class="item-title">{{ $t('today') }}</h2>
         <div
-          class="item-video"
           v-if="statistics.current.mostCringeVideo"
+          class="item-video"
         >
           <div class="preview-container">
             <div class="stats">
@@ -125,8 +125,8 @@
       <div class="item">
         <h2 class="item-title">{{ $t('allTime') }}</h2>
         <div
-          class="item-video"
           v-if="statistics.allTime.mostCringeVideo"
+          class="item-video"
         >
           <div class="preview-container">
             <div class="stats">
@@ -218,9 +218,9 @@ onMounted(() => {
         spawnRandomParticle(
           [winner.value],
           winnerContainer.value as any,
-          2
+          2,
         ).innerText = getRandItem(
-          emojis[winner.value as 'kek' | 'cringe' | 'nothing']
+          emojis[winner.value as 'kek' | 'cringe' | 'nothing'],
         );
       }, 300);
     }, 600);
@@ -238,7 +238,7 @@ onBeforeUnmount(() => {
   }
 });
 </script>
-<style lang="scss" scoped>
+<style scoped>
 .end-page {
   overflow: hidden;
   width: 100vw;
@@ -355,26 +355,26 @@ onBeforeUnmount(() => {
       flex-direction: column;
       align-items: center;
       gap: 16px;
+    }
 
-      &-nodata {
-        margin-top: -20px;
-        height: 320px;
-        width: 480px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 52px;
-        transform: rotate(-23deg);
-        color: #fff;
-        opacity: 0.4;
-      }
+    .item-nodata {
+      margin-top: -20px;
+      height: 320px;
+      width: 480px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 52px;
+      transform: rotate(-23deg);
+      color: #fff;
+      opacity: 0.4;
+    }
 
-      &-title {
-        border-bottom: 3px solid #fff;
-        padding-bottom: 6px;
-        width: 30%;
-        text-align: center;
-      }
+    .item-title {
+      border-bottom: 3px solid #fff;
+      padding-bottom: 6px;
+      width: 30%;
+      text-align: center;
     }
 
     .name {
@@ -387,17 +387,16 @@ onBeforeUnmount(() => {
       border-radius: 8px;
       max-height: 360px;
       max-width: 480px;
-
-      &-container {
-        position: relative;
-        transition: transform 0.2s ease;
-
-        &:hover {
-          transform: scale(1.1) rotate(4deg);
-        }
-      }
-
       margin-bottom: 10px;
+    }
+
+    .preview-container {
+      position: relative;
+      transition: transform 0.2s ease;
+
+      &:hover {
+        transform: scale(1.1) rotate(4deg);
+      }
     }
 
     .stats {

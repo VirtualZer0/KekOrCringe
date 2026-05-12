@@ -6,15 +6,13 @@ import locales from './locales';
 import PrimeVue from 'primevue/config';
 import ConfirmationService from 'primevue/confirmationservice';
 import ToastService from 'primevue/toastservice';
+import Aura from '@primeuix/themes/aura';
 
 import 'normalize.css';
-
-import 'primevue/resources/themes/lara-light-teal/theme.css';
-import 'primevue/resources/primevue.min.css';
 import 'primeicons/primeicons.css';
 
-import '@/assets/style/colors.scss';
-import '@/assets/style/main.scss';
+import '@/assets/style/colors.css';
+import '@/assets/style/main.css';
 import { useStore } from './store';
 import { createPinia } from 'pinia';
 
@@ -31,7 +29,16 @@ const app = createApp(App)
   .use(router)
   .use(i18n)
   .use(pinia)
-  .use(PrimeVue)
+  .use(PrimeVue, {
+    theme: {
+      preset: Aura,
+      options: {
+        prefix: 'p',
+        darkModeSelector: '.dark-mode',
+        cssLayer: false,
+      },
+    },
+  })
   .use(ConfirmationService)
   .use(ToastService);
 

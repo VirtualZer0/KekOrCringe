@@ -15,10 +15,11 @@
       }"
     />
     <div
-      class="ratebar-item"
       v-for="vote in Object.keys(props.votes).filter(
-        (k) => k != 'kek' && k != 'cringe'
+        (k) => k != 'kek' && k != 'cringe',
       )"
+      :key="vote"
+      class="ratebar-item"
       :style="{
         backgroundColor: variantColor[vote],
         width:
@@ -27,7 +28,6 @@
             100 +
           '%',
       }"
-      :key="vote"
     />
     <div
       class="ratebar-item"
@@ -71,7 +71,7 @@ const variantColor = computed(() => {
   return voteParams;
 });
 </script>
-<style lang="scss" scoped>
+<style scoped>
 .ratebar {
   display: flex;
   position: absolute;
@@ -80,11 +80,11 @@ const variantColor = computed(() => {
   border-radius: 0 0 12px 12px;
   overflow: hidden;
   animation: ratebar-appear 0.3s ease-in;
+}
 
-  &-item {
-    height: 32px;
-    transition: width 0.2s ease;
-  }
+.ratebar-item {
+  height: 32px;
+  transition: width 0.2s ease;
 }
 
 @keyframes ratebar-appear {

@@ -1,11 +1,11 @@
 <template>
   <div class="lang-switcher">
     <div
-      v-for="(lang, i) in langs"
-      class="item"
+      v-for="lang in langs"
       :key="lang"
-      @click="setLang(lang)"
+      class="item"
       :class="{ active: activeLang.includes(lang) }"
+      @click="setLang(lang)"
     >
       {{ lang.toUpperCase() }}
     </div>
@@ -26,7 +26,7 @@ const setLang = (lang: string) => {
   i18n.locale.value = lang;
 };
 </script>
-<style lang="scss" scoped>
+<style scoped>
 .lang-switcher {
   display: flex;
   font-size: 21px;

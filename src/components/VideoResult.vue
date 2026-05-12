@@ -43,14 +43,14 @@ const getText = () => {
     return t(
       `${props.strong && props.result != 'neutral' ? 'very' : ''}${
         props.result
-      }`
+      }`,
     ).toUpperCase();
   } else {
     return variant.name.toUpperCase();
   }
 };
 </script>
-<style lang="scss" scoped>
+<style scoped>
 .video-result {
   position: fixed;
   left: 0;
@@ -92,8 +92,13 @@ const getText = () => {
   }
 
   .text {
-    text-shadow: 1px 1px 1px #919191, 1px 2px 1px #919191, 1px 3px 1px #919191,
-      1px 4px 1px #919191, 1px 5px 1px #919191, 1px 6px 1px #919191,
+    text-shadow:
+      1px 1px 1px #919191,
+      1px 2px 1px #919191,
+      1px 3px 1px #919191,
+      1px 4px 1px #919191,
+      1px 5px 1px #919191,
+      1px 6px 1px #919191,
       1px 7px 1px #919191;
     font-size: 7vw;
     font-weight: bold;

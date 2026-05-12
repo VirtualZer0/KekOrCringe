@@ -14,32 +14,32 @@
 
     <div class="row">
       <div class="title">{{ $t('settings.addMethod') }}</div>
-      <Dropdown
-        :options="addMethods"
-        optionLabel="name"
-        optionValue="code"
-        :placeholder="$t('settings.selectMethod')"
+      <Select
         v-model="videoSettings.addVideoMethod"
+        :options="addMethods"
+        option-label="name"
+        option-value="code"
+        :placeholder="$t('settings.selectMethod')"
       />
     </div>
     <div
-      class="row"
       v-if="videoSettings.addVideoMethod == 'bits'"
+      class="row"
     >
       <div class="title">
         {{ $t('settings.bitsCount') }}
       </div>
       <InputNumber
+        v-model="videoSettings.bitsCount"
         class="small"
-        showButtons
+        show-buttons
         :step="1"
         :min="1"
-        v-model="videoSettings.bitsCount"
       />
     </div>
     <div
-      class="row"
       v-if="videoSettings.addVideoMethod == 'reward'"
+      class="row"
     >
       <div class="title">{{ $t('settings.reward') }}</div>
       <Button
@@ -64,19 +64,19 @@
     <div class="row">
       <div class="title">{{ $t('settings.duration') }}</div>
       <InputNumber
+        v-model="videoSettings.durationFrom"
         class="small"
-        showButtons
+        show-buttons
         :step="0.1"
         :min="0"
-        v-model="videoSettings.durationFrom"
       />
       <div>/</div>
       <InputNumber
+        v-model="videoSettings.durationTo"
         class="small"
-        showButtons
+        show-buttons
         :step="0.1"
         :min="videoSettings.durationFrom"
-        v-model="videoSettings.durationTo"
       />
       <div>{{ $t('settings.mins') }}</div>
     </div>
@@ -89,7 +89,7 @@
       <InputNumber
         v-model="videoSettings.skipCount"
         class="small"
-        showButtons
+        show-buttons
         :step="1"
         :min="1"
       />
@@ -97,29 +97,29 @@
     <div class="row">
       <div class="title">{{ $t('settings.queueSize') }}</div>
       <InputNumber
+        v-model="videoSettings.queueSize"
         class="small"
-        showButtons
+        show-buttons
         :step="1"
         :min="5"
-        v-model="videoSettings.queueSize"
       />
     </div>
     <div class="row">
       <Checkbox
-        :binary="true"
-        inputId="banwordsFilter"
         v-model="videoSettings.banwordsFilter"
+        :binary="true"
+        input-id="banwordsFilter"
       />
       <label for="banwordsFilter">{{ $t('settings.banwordsFilter') }}</label>
     </div>
     <div
-      class="row"
       v-if="false"
+      class="row"
     >
       <Checkbox
-        :binary="true"
-        inputId="autoSwitch"
         v-model="videoSettings.autoSwitch"
+        :binary="true"
+        input-id="autoSwitch"
       />
       <label for="autoSwitch">{{ $t('settings.autoSwitch') }}</label>
     </div>
@@ -129,7 +129,7 @@
 import Panel from 'primevue/panel';
 import InputNumber from 'primevue/inputnumber';
 import Checkbox from 'primevue/checkbox';
-import Dropdown from 'primevue/dropdown';
+import Select from 'primevue/select';
 import Button from 'primevue/button';
 import { useStore } from '@/store';
 import { useI18n } from 'vue-i18n';
@@ -173,12 +173,12 @@ const addMethods = [
 const selectedReward = computed(() => {
   return (
     store.rewardsCache.find(
-      (reward) => reward.id == videoSettings.value.selectedRewardId
+      (reward) => reward.id == videoSettings.value.selectedRewardId,
     ) ?? null
   );
 });
 </script>
-<style lang="scss" scoped>
+<style scoped>
 .row {
   display: flex;
   flex-wrap: wrap;

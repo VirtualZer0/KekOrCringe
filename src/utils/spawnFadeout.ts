@@ -1,7 +1,7 @@
 export const spawnFadeout = (
   target: HTMLElement,
   type: 'div' | 'img' = 'div',
-  content = ''
+  content = '',
 ) => {
   const fadeoutElement = document.createElement(type);
 

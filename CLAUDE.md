@@ -77,14 +77,16 @@ Default to surfacing uncertainty, not hiding it.
 
 ## Commands
 
-Package manager is **yarn** (see README; `package-lock.json` is also checked in for CI).
+Package manager is **npm** (`package-lock.json` is checked in).
 
-- `yarn install` — install dependencies
-- `yarn serve` / `yarn dev` — dev server with HMR (both alias `vue-cli-service serve`)
-- `yarn build` — production build (publicPath `/KekOrCringe/` for GitHub Pages, see `vue.config.js`)
-- `yarn lint` — ESLint + Prettier autofix via `vue-cli-service lint`
+- `npm install` — install dependencies
+- `npm run dev` / `npm run serve` — Vite dev server with HMR
+- `npm run build` — `vue-tsc --noEmit` then `vite build` (base `/KekOrCringe/` for GitHub Pages, see `vite.config.ts`)
+- `npm run preview` — local preview of the production build
+- `npm run type-check` — `vue-tsc --noEmit` only
+- `npm run lint` — ESLint 9 (flat config in `eslint.config.js`) + Prettier autofix
 
-There is **no test suite** and no typecheck script — type errors only surface during build. Run `yarn build` to catch them.
+There is **no test suite**. Type errors surface via `npm run type-check` (also run as part of `npm run build`).
 
 CI (`.github/workflows/main.yml`) runs on every push and deploys to GitHub Pages via `thefrustrateddev/vue-deploy-github-pages@v1.0.0`.
 
@@ -137,6 +139,6 @@ The `kek` and `cringe` variants are `permanent: true` and must not be deleted; s
 
 - **PrimeVue** for components (registered globally; import individual components per-file, e.g. `import Button from 'primevue/button'`)
 - **PrimeVue services** wired in `main.ts`: `Toast` and `ConfirmPopup` are mounted once in `App.vue`; use `useToast()` / `useConfirm()` from PrimeVue
-- **Path alias**: `@/*` → `src/*` (configured in both `tsconfig.json` and Vue CLI)
-- **SCSS** is the styling default; component styles use `<style lang="scss" scoped>`; global theme vars `--c1`…`--c5` come from `@/assets/style/colors.scss`
+- **Path alias**: `@/*` → `src/*` (configured in both `tsconfig.json` and `vite.config.ts`)
+- **Pure CSS** with native CSS Nesting (no preprocessor); component styles use `<style scoped>`; global theme vars `--c1`…`--c5` come from `@/assets/style/colors.css`. `@keyframes` must stay at top-level (not nested inside selectors).
 - ESLint enforces single quotes, no semicolons-via-prettier, `singleAttributePerLine`, `arrowParens: always`

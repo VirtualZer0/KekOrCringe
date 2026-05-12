@@ -7,9 +7,9 @@
     />
     <VideoQueue
       :visible="showQueue"
-      @close="showQueue = false"
       :queue="Object.values(videoList)"
-      :currentPlaying="currentVote.videoId ?? ''"
+      :current-playing="currentVote.videoId ?? ''"
+      @close="showQueue = false"
       @remove="removeVideoFromList($event)"
       @clear="clearQueue()"
     />
@@ -18,9 +18,9 @@
         <Button
           icon="pi pi-images"
           :label="$t('queue')"
-          @click="showQueue = true"
           :badge="Object.keys(videoList).length.toString()"
-          badgeClass="queue-badge"
+          badge-class="queue-badge"
+          @click="showQueue = true"
         />
         <Button
           icon="pi pi-power-off"
@@ -30,8 +30,8 @@
         />
       </div>
       <div
-        class="title"
         v-if="currentVote.videoId"
+        class="title"
         :style="{
           width: `${playerSizeW}vmax`,
           maxWidth: `${playerSizeW}vmax`,
@@ -54,11 +54,15 @@
             maxHeight: `${playerSizeH}vmax`,
           }"
         >
-          <div class="launch-block" v-if="!currentVote.videoId">
+          <div
+            v-if="!currentVote.videoId"
+            class="launch-block"
+          >
             {{ $t('videoWait') }}
           </div>
           <YouTube
             v-show="currentVote.videoId"
+            ref="ytPlayer"
             :width="playerSize.width"
             :height="playerSize.height"
             :src="`https://www.youtube.com/watch?v=${currentVote.videoId}`"
@@ -66,16 +70,18 @@
               modestbranding: 1,
               iv_load_policy: 3,
             }"
-            ref="ytPlayer"
             @ready="onPlayerReady"
           />
           <RateBar
             v-if="currentVote.videoId"
             :votes="currentVote.votes"
-            :voteCount="currentVote.voteCount"
+            :vote-count="currentVote.voteCount"
             :width="playerSize.width"
           />
-          <div class="next-container" v-if="currentVote.videoId">
+          <div
+            v-if="currentVote.videoId"
+            class="next-container"
+          >
             <Button
               icon="pi pi-fast-forward"
               class="next-button"
@@ -92,7 +98,7 @@
       </div>
       <RateBlock
         :votes="currentVote.votes"
-        :isActive="currentVote.isActive"
+        :is-active="currentVote.isActive"
         @init="setVariantRefs"
         @vote="addVote($event, 'me')"
       />
@@ -160,7 +166,7 @@ const currentVote = ref<{
 const setVariantRefs = (vRefs: Record<string, any>) => (variantRefs = vRefs);
 
 const recalcStatistics = (winner: 'cringe' | 'kek') => {
-  ['current', 'allTime'].forEach((statType) => {
+  (['current', 'allTime'] as const).forEach((statType) => {
     const capitalizedWinner = winner.charAt(0).toUpperCase() + winner.slice(1);
     statistics.value[statType][`all${capitalizedWinner}Count`]++;
     const percent =
@@ -208,14 +214,14 @@ const addVote = (variant: string, user: string) => {
         spawnFadeout(
           variantRefs[variant]?.$el,
           'div',
-          getRandItem(['😁', '😆', '😃', '👍'])
+          getRandItem(['😁', '😆', '😃', '👍']),
         );
         break;
       case 'cringe':
         spawnFadeout(
           variantRefs[variant]?.$el,
           'div',
-          getRandItem(['👎', '💩', '😡', '☹️'])
+          getRandItem(['👎', '💩', '😡', '☹️']),
         );
         break;
 
@@ -223,7 +229,7 @@ const addVote = (variant: string, user: string) => {
         spawnFadeout(
           variantRefs[variant]?.$el,
           'div',
-          getRandItem(['👀', '✌️', '✨', '⚡️'])
+          getRandItem(['👀', '✌️', '✨', '⚡️']),
         );
         break;
     }
@@ -232,7 +238,7 @@ const addVote = (variant: string, user: string) => {
   Object.entries(currentVote.value.votes).forEach((vote) => {
     if (vote[1].includes(user)) {
       currentVote.value.skipCount += store.variantsSettings.find(
-        (v) => v.name == vote[0]
+        (v) => v.name == vote[0],
       )?.skipModifier as number;
       currentVote.value.votes[vote[0]] = vote[1].filter((v) => v != user);
       currentVote.value.voteCount--;
@@ -240,7 +246,7 @@ const addVote = (variant: string, user: string) => {
   });
 
   currentVote.value.skipCount -= store.variantsSettings.find(
-    (v) => v.name == variant
+    (v) => v.name == variant,
   )?.skipModifier as number;
   currentVote.value.votes[variant].push(user);
   currentVote.value.voteCount++;
@@ -269,7 +275,7 @@ const pendingVideoIds = new Set<string>();
 const handleUserMessage = async (
   type: 'bits' | 'reward' | 'message',
   user: string,
-  msg: string
+  msg: string,
 ) => {
   // Check if msg contains video
   if (type == store.videoSettings.addVideoMethod) {
@@ -318,7 +324,7 @@ const handleUserMessage = async (
   }
 
   const foundedVariant = store.variantsSettings.find((v) =>
-    v.words.find((w) => w?.name && w.name.toLowerCase() == msg.toLowerCase())
+    v.words.find((w) => w?.name && w.name.toLowerCase() == msg.toLowerCase()),
   );
 
   if (foundedVariant) {
@@ -344,7 +350,7 @@ const setActiveVideo = (videoId: string | null) => {
   currentVote.value.voteCount = 0;
   currentVote.value.skipCount = store.videoSettings.skipCount;
   Object.keys(currentVote.value.votes).forEach(
-    (vote) => (currentVote.value.votes[vote] = [])
+    (vote) => (currentVote.value.votes[vote] = []),
   );
 };
 
@@ -363,7 +369,7 @@ const launchResult = () => {
     0,
     ...Object.entries(currentVote.value.votes)
       .filter((pair) => pair[0] != 'kek' && pair[0] != 'cringe')
-      .map((pair) => pair[1].length)
+      .map((pair) => pair[1].length),
   );
 
   let winner: string;
@@ -371,7 +377,7 @@ const launchResult = () => {
     winner = 'neutral';
   } else {
     winner = Object.entries(currentVote.value.votes).sort(
-      (a, b) => b[1].length - a[1].length
+      (a, b) => b[1].length - a[1].length,
     )[0][0];
   }
 
@@ -503,7 +509,7 @@ onBeforeUnmount(() => {
 });
 </script>
 
-<style lang="scss" scoped>
+<style scoped>
 .run-page {
   overflow: hidden;
   width: 100vw;

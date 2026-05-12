@@ -125,23 +125,23 @@ const importSettings = () => {
             // Snapshot defaults so we can restore kek/cringe if the import drops them
             const defaultKek = JSON.parse(
               JSON.stringify(
-                store.variantsSettings.find((v) => v.name === 'kek')
-              )
+                store.variantsSettings.find((v) => v.name === 'kek'),
+              ),
             );
             const defaultCringe = JSON.parse(
               JSON.stringify(
-                store.variantsSettings.find((v) => v.name === 'cringe')
-              )
+                store.variantsSettings.find((v) => v.name === 'cringe'),
+              ),
             );
 
             store.$patch(JSON.parse(content as string));
 
             // Enforce permanent invariants for kek/cringe regardless of import shape
             const kekEntry = store.variantsSettings.find(
-              (v) => v.name === 'kek'
+              (v) => v.name === 'kek',
             );
             const cringeEntry = store.variantsSettings.find(
-              (v) => v.name === 'cringe'
+              (v) => v.name === 'cringe',
             );
             if (kekEntry) {
               kekEntry.permanent = true;
@@ -176,7 +176,7 @@ const importSettings = () => {
   input.click();
 };
 </script>
-<style lang="scss" scoped>
+<style scoped>
 .other-settings {
   display: flex;
   flex-wrap: wrap;

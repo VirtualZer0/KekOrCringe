@@ -46,12 +46,12 @@ export const useChat = () => {
           ev(
             context['display-name'] ?? '',
             message,
-            context['custom-reward-id']
-          )
+            context['custom-reward-id'],
+          ),
         );
       } else {
         events.onMessage.forEach((ev) =>
-          ev(context['display-name'] ?? '', message)
+          ev(context['display-name'] ?? '', message),
         );
       }
     });
@@ -61,8 +61,8 @@ export const useChat = () => {
         ev(
           context['display-name'] ?? '',
           message,
-          parseInt(context.bits ?? '0')
-        )
+          parseInt(context.bits ?? '0'),
+        ),
       );
     });
 
@@ -78,14 +78,14 @@ export const useChat = () => {
 
   const on = (
     type: 'Reward' | 'Message' | 'Bits',
-    cb: (...args: any) => void
+    cb: (...args: any) => void,
   ) => {
     events[`on${type}`].push(cb);
   };
 
   const off = (
     type: 'Reward' | 'Message' | 'Bits',
-    cb: (...args: any) => void
+    cb: (...args: any) => void,
   ) => {
     const index = events[`on${type}`].indexOf(cb);
     if (index > -1) {

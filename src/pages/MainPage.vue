@@ -25,7 +25,7 @@ import { useRouter } from 'vue-router';
 const router = useRouter();
 </script>
 
-<style lang="scss" scoped>
+<style scoped>
 .main-page {
   width: 100vw;
   height: 100vh;
@@ -48,7 +48,7 @@ const router = useRouter();
     text-decoration: none;
     font-weight: bold;
     color: #fff;
-    text-shadow: 1px 1px 3px rgba($color: #000000, $alpha: 0.3);
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
     left: 50%;
     transform: translateX(-50%);
 
