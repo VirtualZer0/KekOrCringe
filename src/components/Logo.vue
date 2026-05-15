@@ -1,79 +1,97 @@
 <template>
   <div class="logo">
-    <div class="left text-xxl">{{ $t('kek').toUpperCase() }}</div>
-    <div class="delimiter">{{ $t('or') }}</div>
-    <div class="right text-xxl">{{ $t('cringe').toUpperCase() }}</div>
+    <div class="row">
+      <span class="word kek">{{ $t('kek').toUpperCase() }}</span>
+      <span class="badge">{{ $t('or') }}</span>
+    </div>
+    <div class="row">
+      <span class="word cringe">{{ $t('cringe').toUpperCase() }}</span>
+    </div>
+    <p class="tagline">{{ $t('tagline') }}</p>
   </div>
 </template>
+
 <style scoped>
 .logo {
-  padding-top: 100px;
   user-select: none;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  position: relative;
+  padding-top: 64px;
+  gap: 0.4vw;
 
-  .left,
-  .right {
-    font-family: 'Courier New', Courier, monospace;
-    z-index: 2;
-    font-weight: bold;
-    text-shadow:
-      1px 1px 1px #919191,
-      1px 2px 1px #919191,
-      1px 3px 1px #919191,
-      1px 4px 1px #919191,
-      1px 5px 1px #919191,
-      1px 6px 1px #919191,
-      1px 7px 1px #919191,
-      1px 8px 1px #919191,
-      1px 9px 1px #919191,
-      1px 10px 1px #919191;
-
-    animation: drop-from-above 0.3s ease-in backwards;
-  }
-
-  .left {
-    animation-delay: 0.6s;
-  }
-
-  .delimiter {
-    animation: drop-from-above 0.3s ease-in backwards;
-    animation-delay: 0.3s;
-    background: var(--fg);
-    width: 8vw;
-    height: 3vw;
-    font-size: 2vw;
-    border-radius: 8px;
+  .row {
     display: flex;
-    justify-content: center;
     align-items: center;
-    color: var(--bg);
-    font-weight: bold;
-    font-family: 'Segoe Script';
-    z-index: 0;
-  }
-}
-
-@keyframes drop-from-above {
-  0% {
-    transform: translateY(-450px);
+    gap: 1.6vw;
   }
 
-  100% {
-    transform: translateY(0);
+  .word {
+    font-family: var(--font-display);
+    font-weight: 900;
+    font-size: 8.6vw;
+    line-height: 1;
+    letter-spacing: 0.01em;
+    -webkit-text-stroke: 4px var(--c1);
+    paint-order: stroke fill;
+    text-shadow:
+      0 1px 0 var(--c1),
+      0 2px 0 var(--c1),
+      0 3px 0 var(--c1),
+      0 4px 0 var(--c1),
+      0 5px 0 var(--c1),
+      0 6px 0 var(--c1),
+      0 7px 0 var(--c1),
+      0 8px 0 var(--c1),
+      0 9px 0 var(--c1),
+      0 10px 0 var(--c1),
+      0 11px 0 var(--c1),
+      0 14px 14px rgba(0, 0, 0, 0.28);
   }
-}
 
-@keyframes fade-in {
-  0% {
-    transform: scale(0);
+  .kek,
+  .cringe,
+  .badge {
+    transform: rotate(var(--rot, 0deg));
+    animation: drop-in 0.5s var(--ease-drop) backwards;
   }
 
-  100% {
-    transform: scale(1);
+  .kek {
+    --rot: -2deg;
+    color: var(--c2);
+    animation-delay: var(--enter-1);
+  }
+
+  .cringe {
+    --rot: 1.5deg;
+    color: var(--c5);
+    animation-delay: var(--enter-3);
+  }
+
+  .badge {
+    --rot: 5deg;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 2.6vw;
+    line-height: 1;
+    color: var(--c1);
+    background: var(--c-surface);
+    border: 4px solid var(--c1);
+    padding: 0.45em 0.7em;
+    border-radius: 0.45em;
+    box-shadow: 0 8px 0 var(--c1);
+    animation-duration: 0.45s;
+    animation-delay: var(--enter-2);
+  }
+
+  .tagline {
+    font-family: var(--font-display);
+    font-weight: 800;
+    color: var(--c1);
+    font-size: 1.5vw;
+    margin: 1.6vw 0 0 0;
+    animation: rise-in 0.5s ease backwards;
+    animation-delay: var(--enter-4);
   }
 }
 </style>

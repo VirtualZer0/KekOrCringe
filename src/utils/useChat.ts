@@ -1,6 +1,15 @@
 import tmi from 'tmi.js';
 let chat: tmi.Client | null = null;
 let connected = false;
+let connecting = false;
+let reconnectAttempts = 0;
+let reconnectTimer: number | null = null;
+// Tracks whether the current outage has already surfaced an error toast.
+// Reset on every successful connection.
+let errorFired = false;
+
+const RECONNECT_DELAYS_MS = [500, 1000, 2000, 5000, 10000, 30000];
+
 const events: {
   onReward: ((user: string, msg: string, rewardId: string) => void)[];
   onMessage: ((user: string, msg: string) => void)[];
@@ -15,18 +24,52 @@ const events: {
   onError: [],
 };
 
+const fireError = (message: string) => {
+  if (errorFired) return;
+  errorFired = true;
+  events.onError.forEach((ev) => ev(message));
+};
+
+const cancelReconnect = () => {
+  if (reconnectTimer !== null) {
+    clearTimeout(reconnectTimer);
+    reconnectTimer = null;
+  }
+};
+
 export const useChat = () => {
   const connect = async () => {
-    if (connected) return;
+    if (connected || connecting || !chat) return;
+    connecting = true;
     try {
-      await chat?.connect();
+      await chat.connect();
+      // 'connected' event handler will flip `connected` and reset state.
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      events.onError.forEach((ev) => ev(message));
+      fireError(message);
+      // tmi may not emit 'disconnected' on initial connect failure — retry ourselves.
+      scheduleReconnect();
+    } finally {
+      connecting = false;
     }
   };
 
+  const scheduleReconnect = () => {
+    cancelReconnect();
+    if (!chat) return;
+    const delay =
+      RECONNECT_DELAYS_MS[
+        Math.min(reconnectAttempts, RECONNECT_DELAYS_MS.length - 1)
+      ];
+    reconnectAttempts++;
+    reconnectTimer = window.setTimeout(() => {
+      reconnectTimer = null;
+      connect();
+    }, delay);
+  };
+
   const disposeCurrent = () => {
+    cancelReconnect();
     if (chat) {
       try {
         chat.removeAllListeners();
@@ -39,6 +82,9 @@ export const useChat = () => {
     }
     chat = null;
     connected = false;
+    connecting = false;
+    reconnectAttempts = 0;
+    errorFired = false;
   };
 
   const create = (channel: string) => {
@@ -50,6 +96,8 @@ export const useChat = () => {
 
     chat.on('connected', () => {
       connected = true;
+      reconnectAttempts = 0;
+      errorFired = false;
       events.onConnected.forEach((ev) => ev());
     });
 
@@ -81,9 +129,11 @@ export const useChat = () => {
 
     chat.on('disconnected', (reason) => {
       connected = false;
+      // chat == null means an intentional destroy() — don't retry or toast.
+      if (!chat) return;
       const detail = reason ? String(reason) : 'unknown reason';
-      events.onError.forEach((ev) => ev(detail));
-      setTimeout(connect, 500);
+      fireError(detail);
+      scheduleReconnect();
     });
   };
 

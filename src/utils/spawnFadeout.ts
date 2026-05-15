@@ -1,8 +1,9 @@
 export const spawnFadeout = (
-  target: HTMLElement,
+  target: HTMLElement | null | undefined,
   type: 'div' | 'img' = 'div',
   content = '',
 ) => {
+  if (!target || !target.isConnected) return null;
   const fadeoutElement = document.createElement(type);
 
   if (type == 'div') {

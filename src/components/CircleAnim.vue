@@ -46,16 +46,4 @@ defineProps({
     backface-visibility: hidden;
   }
 }
-
-@keyframes circle-appear {
-  0% {
-    height: 0;
-    width: 0;
-  }
-
-  100% {
-    height: 150vmax;
-    width: 150vmax;
-  }
-}
 </style>

@@ -1,2 +1,2 @@
-export const getRandItem = (arr: any[]) =>
+export const getRandItem = <T>(arr: readonly T[]): T =>
   arr[Math.floor(Math.random() * arr.length)];

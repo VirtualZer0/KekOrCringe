@@ -9,6 +9,7 @@
       :style="{
         backgroundColor: '#2a9d8f',
         borderColor: '#2a9d8f',
+        '--bevel-color': 'color-mix(in srgb, #2a9d8f 65%, black)',
         paddingLeft: variantEmote['kek'] ? '74px' : '32px',
       }"
       @click="emits('vote', 'kek')"
@@ -37,6 +38,7 @@
       :style="{
         backgroundColor: variant.color,
         borderColor: variant.color,
+        '--bevel-color': `color-mix(in srgb, ${variant.color} 65%, black)`,
         color: getCorrectFgColor(variant.color),
         paddingLeft: variantEmote[variant.name] ? '74px' : '32px',
       }"
@@ -57,6 +59,7 @@
       :style="{
         backgroundColor: '#e76f51',
         borderColor: '#e76f51',
+        '--bevel-color': 'color-mix(in srgb, #e76f51 65%, black)',
         paddingLeft: variantEmote['cringe'] ? '74px' : '32px',
       }"
       @click="emits('vote', 'cringe')"
@@ -77,7 +80,7 @@ import { computed, onBeforeUpdate, onMounted, onUpdated } from 'vue';
 import { getCorrectFgColor } from '@/utils/getCorrectFgColor';
 import { useStore } from '@/store';
 
-import Button from 'primevue/button';
+import { Button } from '@/components/ui/button';
 
 const props = defineProps({
   isActive: {
@@ -91,7 +94,11 @@ const props = defineProps({
 });
 
 const store = useStore();
-let variantRefs: Record<string, any> = {};
+// Stable reference shared with the parent — clear in place between updates
+// so any stray dereference during the update cycle hits the new entries,
+// not a detached array. Re-assigning would briefly leave the parent reading
+// stale refs.
+const variantRefs: Record<string, any> = {};
 
 const emits = defineEmits(['init', 'vote']);
 
@@ -106,7 +113,7 @@ const variantEmote = computed(() => {
 onMounted(() => emits('init', variantRefs));
 
 onBeforeUpdate(() => {
-  variantRefs = [];
+  for (const key in variantRefs) delete variantRefs[key];
 });
 
 onUpdated(() => emits('init', variantRefs));
@@ -124,7 +131,6 @@ onUpdated(() => emits('init', variantRefs));
   .rate-variant {
     position: relative;
     overflow: visible;
-    display: block;
     min-width: 110px;
     height: 70px;
     display: flex;
@@ -137,6 +143,10 @@ onUpdated(() => emits('init', variantRefs));
     text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
     transition: all 0.2s ease;
     text-transform: capitalize;
+    box-shadow:
+      inset 0 2px 0 rgba(255, 255, 255, 0.28),
+      0 6px 0 var(--bevel-color, var(--c1)),
+      0 10px 14px rgba(0, 0, 0, 0.22);
 
     img {
       position: absolute;
@@ -158,15 +168,19 @@ onUpdated(() => emits('init', variantRefs));
       text-shadow: none;
       background: var(--c1);
       padding: 4px;
-      border-radius: 16px;
+      border-radius: 10px;
     }
 
     &:hover {
       transform: scale(1.2);
     }
 
-    &:focus {
-      box-shadow: none;
+    &:active {
+      transform: translateY(4px);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        0 2px 0 var(--bevel-color, var(--c1)),
+        0 4px 6px rgba(0, 0, 0, 0.18);
     }
   }
 

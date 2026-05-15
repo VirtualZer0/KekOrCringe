@@ -80,7 +80,7 @@ Default to surfacing uncertainty, not hiding it.
 Package manager is **npm** (`package-lock.json` is checked in).
 
 - `npm install` — install dependencies
-- `npm run dev` / `npm run serve` — Vite dev server with HMR
+- `npm run dev` / `npm run serve` — Vite dev server with HMR (port 8080, `strictPort: false` so it falls through if busy)
 - `npm run build` — `vue-tsc --noEmit` then `vite build` (base `/KekOrCringe/` for GitHub Pages, see `vite.config.ts`)
 - `npm run preview` — local preview of the production build
 - `npm run type-check` — `vue-tsc --noEmit` only
@@ -88,57 +88,73 @@ Package manager is **npm** (`package-lock.json` is checked in).
 
 There is **no test suite**. Type errors surface via `npm run type-check` (also run as part of `npm run build`).
 
-CI (`.github/workflows/main.yml`) runs on every push and deploys to GitHub Pages via `thefrustrateddev/vue-deploy-github-pages@v1.0.0`.
+CI (`.github/workflows/main.yml`) deploys to GitHub Pages on push to `master` using the official `actions/configure-pages` + `actions/deploy-pages` workflow. Repo Settings → Pages → Source must be set to **GitHub Actions** for the deploy to land. Manual runs via `workflow_dispatch` are enabled.
 
 ## Architecture
 
-Single-page Vue 3 + TypeScript app that gates Twitch viewers' YouTube submissions through a live "kek or cringe" chat vote. The whole app is **client-only** — no backend; everything persists in `localStorage`.
+Single-page Vue 3 + TypeScript app that gates Twitch viewers' video submissions (YouTube, TikTok, Twitch clips) through a live "kek or cringe" chat vote. The whole app is **client-only** — no backend; everything persists in `localStorage`.
 
 ### Page flow (linear)
 
-`MainPage` → `SettingsPage` → `RunPage` → `EndPage`, wired via `vue-router` with **hash history** (`createWebHashHistory`) so GitHub Pages can serve it.
+`MainPage` → `SettingsPage` → `RunPage` → `EndPage`, wired in `src/router/index.ts` using **hash history** (`createWebHashHistory`) so GitHub Pages can serve it. Page components live in `src/pages/`.
 
-`App.vue` intercepts every route change to play a `CircleAnim` color-wipe transition: each route declares a `meta.color`, the outgoing anim uses the previous color, the incoming uses the next. Navigation is delayed ~210ms so the wipe lands before the page mounts.
+`App.vue` intercepts every route change to play a `CircleAnim` color-wipe transition: each route declares a `meta.color`, the outgoing anim uses the previous color, the incoming uses the next. Navigation is delayed `ROUTE_ANIM_MS` (~210ms) so the wipe lands before the page mounts. Navigations to `Main` are special-cased to bypass the wipe (instant `next()`). Pending timers are tracked so a fast re-navigation supersedes the previous animation's state changes instead of letting stale timeouts fire against the newer route.
 
 ### State and persistence
 
-`src/store.ts` exports a single Pinia store (`useStore`) that **must be manually persisted** — call `store.save()` after mutations, and `store.load()` runs once from `main.ts` on boot. The whole `$state` is JSON-serialized to `localStorage['store']`.
+`src/store.ts` exports a single Pinia store (`useStore`) that **must be manually persisted** — call `store.save()` after mutations, and `store.load()` runs once from `main.ts` on boot. The whole `$state` is JSON-serialized to `localStorage['store']`. The store covers config (channel, video settings, variants), rewards/emote caches, and session toggles (`sfxMuted`, `skipPoints`).
+
+`videoSettings.enabledPlatforms` is the list of `VideoPlatform` values (`'youtube' | 'tiktok' | 'twitch'`) that accept submissions during a run — used by `extractVideoLink` to gate URL matching.
 
 Statistics and the live video queue are stored **separately** from the Pinia store (intentional — they're tied to a run, not config):
 
-- `localStorage['statistics']` — managed via `src/utils/statisticsUtils.ts`; `{ allTime, current }` shape, `current` resets each run
-- `localStorage['videoList']` — `Record<videoId, IVideoData>`, written directly from `RunPage.vue`
-- `localStorage['users']` — submitter metadata, written from `RunPage.vue`
-- `localStorage['lang']` — i18n override (otherwise falls back to `navigator.language`, then `en`)
+- `localStorage['statistics']` — managed via `src/utils/statisticsUtils.ts`; `{ allTime, current }` shape. `current` is reset only by `SettingsPage`'s Run button (explicit "new run"). `RunPage` reads it with `getStatistics(false)` so an accidental reload mid-run doesn't wipe the current-run block.
+- `localStorage['videoList']` — `Record<videoId, IVideoData>`, owned by the `useVideoQueue` composable (`src/composables/useVideoQueue.ts`). Use the composable's `add` / `remove` / `clear` / `updateDuration` rather than touching `localStorage` directly.
+- `localStorage['lang']` — i18n override; resolution lives in `src/utils/locale.ts` (`getInitialLang()` → saved → `navigator.language` prefix → `'en'`).
 
 ### Twitch chat integration
 
-`src/utils/useChat.ts` is a **module-level singleton**, not a real Vue composable — listener arrays and the `tmi.Client` live in module scope. Calling `useChat()` returns the same `create / connect / on / off` handles. Re-entering `RunPage` reuses the same client; remember to `chat.off(...)` on `onBeforeUnmount` (current code does).
+`src/utils/useChat.ts` is a **module-level singleton**, not a real Vue composable — listener arrays and the `tmi.Client` live in module scope. Calling `useChat()` returns the same `create / connect / destroy / on / off` handles. `destroy()` removes all listeners, disconnects, and resets internal state — call it from `onBeforeUnmount` (RunPage does).
 
-Events: `Reward` (chat messages with `custom-reward-id`), `Message` (regular messages), `Bits` (cheers). The client auto-reconnects on `disconnected` with a 500ms backoff.
+Events: `Reward` (chat messages with `custom-reward-id`), `Message` (regular chat), `Bits` (cheers), `Connected` (one-shot connect toast), `Error` (fires once per outage, then suppressed until the next successful connect to prevent toast spam). Reconnect uses exponential backoff `[500, 1000, 2000, 5000, 10000, 30000]` ms indexed by attempt count. An intentional `destroy()` nulls the `chat` reference so the `'disconnected'` handler bails out instead of scheduling a retry.
 
 ### Vote mechanics (`RunPage.vue`)
 
 Three trigger methods configured via `videoSettings.addVideoMethod`: `message` / `reward` / `bits`. `handleUserMessage` only accepts video submissions matching the current method; everything else is tested against `variantsSettings` to record a vote.
 
+Video URLs are detected by `extractVideoLink(msg, enabledPlatforms)` from `src/utils/videoSources/index.ts`, then metadata is fetched via `fetchVideoMetadata`. Submissions are deduped by `platform:id` while the fetch is in flight (via a `pendingFetches` set), with a fallback to the URL string for shortlinks that can't be resolved synchronously.
+
 `currentVote.skipCount` starts at `videoSettings.skipCount` and accumulates each variant's `skipModifier` per vote (`kek` is `-1`, `cringe` is `+1`). Hitting `<= 0` ends the round. A user's previous vote is removed before adding the new one — users can change their mind.
 
-The `kek` and `cringe` variants are `permanent: true` and must not be deleted; statistics, the "strong winner" check, and the final tally all reference them by literal name. Additional user-defined variants are allowed and participate in voting, but never become the winner unless they outvote both `kek` and `cringe`.
+The `kek` and `cringe` variants are `permanent: true` and must not be deleted; statistics, the "strong winner" check, and the final tally all reference them by literal name. Additional user-defined variants are allowed and participate in voting, but never become the winner unless they outvote both `kek` and `cringe`. A "strong" win means the winner had a complete shutout (every other variant got 0 votes). A `kek`/`cringe` tie that no custom variant exceeds produces a `neutral` result — not credited to either side's statistics, but still increments `allVideos`.
+
+### Video source adapters
+
+`src/utils/videoSources/` implements a platform-pluggable adapter pattern. Each platform exposes an `IVideoSourceAdapter` (see `types.ts`) with `hostRegex`, optional sync `extractId`, async `fetchMetadata`, and `buildEmbedSrc`. Adapters are registered in `index.ts`'s `adapters` record keyed by `VideoPlatform`. To add a new platform: create a new adapter file, add the key to `VideoPlatform`, register it in `adapters`, and include it in the default `videoSettings.enabledPlatforms` in `src/store.ts`.
+
+`badWords.ts` exposes `containsBadWord(title)` — every adapter calls it when `options.filterBadwords` is set and `bypassChecks` is not.
+
+`UniversalPlayer.vue` (used by `RunPage`) renders the right embed component per platform — `<youtube-video>` / `<tiktok-video>` custom elements (declared in `vite.config.ts` as `isCustomElement`), and `TwitchClipPlayer.vue` for Twitch clips.
 
 ### External API access (no auth)
 
-- **YouTube Data API v3** — key is obfuscated in `src/utils/YTUtils.ts` (`apiKey` constant) and decoded at call time via reverse + char substitution. Treat it as committed and rate-limited; do not hardcode a new key elsewhere.
-- **Twitch GraphQL** (`src/utils/getTwitchRewards.ts`) — uses the **public web client-id** `kimne78kx3ncx6brgo4mv6wki5h1ko` with a persisted-query hash to fetch channel custom rewards. This is unauthenticated and may break if Twitch rotates the hash.
-- **BTTV / 7TV / FFZ** — public emote endpoints called from `SettingsPage.vue` once `twitchId` is known. Each is wrapped in its own `try/catch` and feeds a Toast on failure; do not gate the run on emote load.
+- **YouTube Data API v3** — key is obfuscated in `src/utils/videoSources/youtube.ts` (`apiKey` constant) and decoded at call time via `@`→`a`, `!`→`0`, then reversed. The literal `AIza…` prefix never appears in source/bundle, so trivial GitHub-wide scrapers won't pick it up. Real protection comes from HTTP-referrer + API restrictions in Google Cloud Console — don't hardcode a new key elsewhere.
+- **TikTok oEmbed + shortlink resolution** — `src/utils/videoSources/tiktok.ts` resolves `vm.tiktok.com` / `vt.tiktok.com` / `tiktok.com/t/...` shortlinks by trying a chain of public CORS proxies (`allorigins.win`, `corsproxy.io`, `codetabs.com`, `cors.lol`) before hitting TikTok's public oEmbed endpoint. Any proxy can break independently; each call has a 4s timeout and the chain falls through. Direct canonical URLs (`tiktok.com/@user/video/123`) bypass the proxy chain entirely.
+- **Twitch clips GraphQL** — `src/utils/videoSources/twitch.ts` uses the public web client-id `kimne78kx3ncx6brgo4mv6wki5h1ko` to fetch clip metadata via a normal GraphQL query (no persisted hash). Embeds require `parent=<hostname>` and won't work from raw IPs — `localhost` is fine.
+- **Twitch channel-point rewards** — `src/utils/getTwitchRewards.ts` uses the same public client-id with a **persisted-query SHA256 hash** to fetch a channel's custom rewards. The hash may break if Twitch rotates it.
+- **BTTV / FFZ / 7TV** — public emote endpoints called from `SettingsPage.vue` once `twitchId` is known. Each is wrapped in its own `try/catch` and surfaces failures via a toast; do not gate the run on emote load. 7TV emotes are stored under `emotesCache.stv` (the field is named `stv`, not `7tv`).
 
 ### i18n
 
-`vue-i18n` with `legacy: false`. Locales live in `src/locales/{en,ru}/main.ts` and are aggregated in `src/locales/index.ts`. Use `$t('key')` in templates and `useI18n()` in `<script setup>`. When adding a string, add it to **both** `en` and `ru`.
+`vue-i18n` with `legacy: false`. Locales live in `src/locales/{en,ru}/main.ts` and are aggregated in `src/locales/index.ts`. Use `$t('key')` in templates and `useI18n()` in `<script setup>`. When adding a string, add it to **both** `en` and `ru`. Initial language resolution is in `src/utils/locale.ts`.
 
 ### UI conventions
 
-- **PrimeVue** for components (registered globally; import individual components per-file, e.g. `import Button from 'primevue/button'`)
-- **PrimeVue services** wired in `main.ts`: `Toast` and `ConfirmPopup` are mounted once in `App.vue`; use `useToast()` / `useConfirm()` from PrimeVue
-- **Path alias**: `@/*` → `src/*` (configured in both `tsconfig.json` and `vite.config.ts`)
-- **Pure CSS** with native CSS Nesting (no preprocessor); component styles use `<style scoped>`; global theme vars `--c1`…`--c5` come from `@/assets/style/colors.css`. `@keyframes` must stay at top-level (not nested inside selectors).
-- ESLint enforces single quotes, no semicolons-via-prettier, `singleAttributePerLine`, `arrowParens: always`
+- **shadcn-vue** for components — copy-pasted source under `src/components/ui/<name>/`, registered via the `components.json` at repo root. Import per-file, e.g. `import { Button } from '@/components/ui/button'`. Add new ones via `npx shadcn-vue@latest add <name>` (style: `new-york`, base color: `neutral`).
+- In-house UI primitives that have no shadcn equivalent: `src/components/ui/chip` (removable pill) and `src/components/ui/color-picker` (native `<input type="color">` wrapper).
+- **Toasts**: `vue-sonner` under the hood, but always go through `@/utils/notify` — `notify.success/error/warning/info(title, { description, duration, action? })`. The wrapper renders a custom `AppToast.vue` component for consistent styling. `<Toaster />` is mounted once in `App.vue`.
+- **Confirm dialogs**: centered `<AlertDialog>` from `@/components/ui/alert-dialog` driven by a local `v-model:open` ref — there is no anchored-popover confirm composable.
+- **Icons**: `lucide-vue-next`. Import per icon and render as `<IconName class="size-4" />`.
+- **Path alias**: `@/*` → `src/*` (configured in `tsconfig.json`, `vite.config.ts`, and `components.json`). The `cn(...)` class-merge helper lives at `@/lib/utils`.
+- **Styling**: Tailwind v4 (configured in `src/assets/style/main.css` via `@import "tailwindcss"` + `@theme inline { … }`). Prefer Tailwind utilities for layout, spacing, typography, and basic colors. Brand colors `--c1`…`--c5` are exposed both as CSS vars (in `colors.css`) and as Tailwind utilities (`bg-c1`, `text-c5`, …). Keep complex bespoke styles (animations, multi-stop gradients, custom positioning, particle effects) in scoped `<style>` blocks. `@keyframes` must stay at top-level (not nested inside selectors). Page-transition animation classes live in `src/assets/style/anim.css`.
+- ESLint enforces single quotes, no semicolons-via-prettier, `singleAttributePerLine`, `arrowParens: always`.

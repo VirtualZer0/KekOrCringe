@@ -1,9 +1,206 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 200 1000;
+  font-display: swap;
+  src: url('../fonts/nunito-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 200 1000;
+  font-display: swap;
+  src: url('../fonts/nunito-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7,
+    U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF,
+    U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 200 1000;
+  font-display: swap;
+  src: url('../fonts/nunito-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA,
+    U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193,
+    U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.145 0 0);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.145 0 0);
+  --primary: oklch(0.6017 0.094 178.84);
+  --primary-foreground: oklch(1 0 0);
+  --secondary: oklch(0.97 0 0);
+  --secondary-foreground: oklch(0.205 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --accent: oklch(0.97 0 0);
+  --accent-foreground: oklch(0.205 0 0);
+  --destructive: var(--c5);
+  --border: oklch(0.922 0 0);
+  --input: oklch(0.922 0 0);
+  --ring: oklch(0.6017 0.094 178.84);
+
+  --font-display: 'Nunito', 'Segoe UI', sans-serif;
+  --rim-border: 2px solid var(--c1);
+
+  --ease-drop: cubic-bezier(0.4, 0, 0.5, 1.25);
+  --ease-fly: cubic-bezier(0.3, 1.4, 0.5, 1);
+  --ease-switch: cubic-bezier(0.4, 0, 0.2, 1);
+
+  --enter-1: 0.3s;
+  --enter-2: 0.6s;
+  --enter-3: 0.85s;
+  --enter-4: 1.15s;
+  --enter-5: 1.25s;
+  --enter-6: 1.5s;
+  --enter-7: 1.55s;
+
+  --press-shift-sm: 2px;
+  --press-shift-lg: 4px;
+
+  --rim-shadow: 0 3px 0 var(--c1);
+  --rim-shadow-pressed: 0 1px 0 var(--c1);
+  --rim-shadow-md: 0 4px 0 var(--c1);
+
+  --route-anim: 210ms;
+
+  --switch-pad: 4px;
+  --switch-gap: 4px;
+
+  --rim-pad-top: 6px;
+  --rim-pad-bottom: 12px;
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-c1: var(--c1);
+  --color-c2: var(--c2);
+  --color-c3: var(--c3);
+  --color-c4: var(--c4);
+  --color-c5: var(--c5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+@layer base {
+  * {
+    @apply border-border;
+    outline-color: transparent;
+  }
+}
+
+@utility bevel-inset-sm {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.2),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.25),
+    0 2px 4px rgba(0, 0, 0, 0.22);
+}
+
+@utility bevel-inset {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    inset 0 -4px 0 rgba(0, 0, 0, 0.25),
+    0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+@utility bevel-inset-lg {
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.25),
+    inset 0 -5px 0 rgba(0, 0, 0, 0.3),
+    0 5px 12px rgba(0, 0, 0, 0.25);
+}
+
+@utility bevel-extrude-sm {
+  box-shadow:
+    0 4px 0 var(--bevel-color, var(--c1)),
+    0 8px 14px rgba(0, 0, 0, 0.2);
+}
+
+@utility bevel-extrude {
+  box-shadow:
+    0 7px 0 var(--bevel-color, var(--c1)),
+    0 14px 22px rgba(0, 0, 0, 0.22);
+}
+
+@utility bevel-extrude-lg {
+  box-shadow:
+    inset 0 2px 0 rgba(255, 255, 255, 0.25),
+    0 12px 0 var(--bevel-color, var(--c1)),
+    0 22px 28px rgba(0, 0, 0, 0.28);
+}
+
+@utility chunky-rim {
+  box-shadow: var(--rim-shadow);
+}
+
+@utility chunky-rim-pressed {
+  box-shadow: var(--rim-shadow-pressed);
+}
+
+@utility chunky-rim-md {
+  box-shadow: var(--rim-shadow-md);
+}
+
 body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: var(--font-display);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   color: var(--fg);
-  scrollbar-gutter: stable;
   scrollbar-width: thin;
 }
 
@@ -17,22 +214,6 @@ body {
     background: #14B8A6;
     border-radius: 20px;
   }
-}
-
-.p-divider {
-  height: 1px;
-  background: var(--p-surface-300);
-}
-
-.p-drawer-header {
-  position: fixed;
-  right: 0;
-  top: 0;
-  z-index: 10;
-}
-
-.p-drawer-content {
-  margin-top: 4px;
 }
 
 h1 {
@@ -52,7 +233,6 @@ h1 {
 .page {
   min-width: 1120px;
   min-height: 680px;
-  max-width: calc(100vw - 8px);
 
   .content {
     position: relative;
@@ -79,46 +259,6 @@ h1 {
   justify-content: center;
 }
 
-.text-s {
-
-}
-
-.text-l {
-  font-size: 1.4vw;
-}
-
-.text-xxl {
-  font-size: 5vw;
-}
-
-@keyframes page-appear {
-  0% {
-    opacity: 0;
-    transform: scale(0.5);
-  }
-
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes fadeout-element {
-  0% {
-    transform: translateY(-50%) translateX(-50%);
-    opacity: 1;
-  }
-
-  30% {
-    opacity: 1;
-  }
-
-  100% {
-    transform: translateY(-260px) translateX(-50%);
-    opacity: 0;
-  }
-}
-
 .particle {
   position: absolute;
   will-change: transform;
@@ -127,18 +267,20 @@ h1 {
   z-index: 0;
 }
 
-@keyframes fadeUp {
-  0% {
-    transform: translateY(0px);
-    opacity: 0;
-  }
+[data-slot='button'][data-variant='default'],
+[data-slot='button'][data-variant='destructive'] {
+  @apply bevel-inset-lg;
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.15s ease;
+}
 
-  5% {
-    opacity: 1;
-  }
+[data-slot='button'][data-variant='default']:active,
+[data-slot='button'][data-variant='destructive']:active {
+  @apply bevel-inset-sm;
+  transform: translateY(var(--press-shift-sm));
+}
 
-  100% {
-    transform: translateY(-150px);
-    opacity: 0;
-  }
+[data-sonner-toaster] {
+  --width: 540px;
 }
