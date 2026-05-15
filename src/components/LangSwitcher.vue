@@ -59,9 +59,7 @@ const setLang = (lang: Lang) => {
   background: var(--c1);
   border-radius: 8px;
   z-index: 0;
-  transform: translateX(
-    calc(var(--idx, 0) * (100% + var(--switch-gap)))
-  );
+  transform: translateX(calc(var(--idx, 0) * (100% + var(--switch-gap))));
   transition: transform 0.3s var(--ease-switch);
 }
 

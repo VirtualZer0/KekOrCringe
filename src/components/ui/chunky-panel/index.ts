@@ -1,1 +1,1 @@
-export { default as ChunkyPanel } from './ChunkyPanel.vue'
+export { default as ChunkyPanel } from './ChunkyPanel.vue';

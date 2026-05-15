@@ -54,8 +54,8 @@ const router = useRouter();
       var(--c5) 90% 95%,
       var(--c1) 95% 100%
     ),
-    radial-gradient(circle, rgba(90, 55, 0, 0.07) 1.4px, transparent 1.6px) 0 0 /
-      18px 18px,
+    radial-gradient(circle, rgba(90, 55, 0, 0.07) 1.4px, transparent 1.6px) 0
+      0 / 18px 18px,
     var(--c3);
 
   .credits {

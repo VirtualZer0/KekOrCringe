@@ -13,12 +13,14 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.3.0",
+    "@types/howler": "^2.2.12",
     "@vueuse/core": "^14.3.0",
     "axios": "^1.7.9",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "duration-to-seconds": "^1.1.1",
     "file-saver": "^2.0.5",
+    "howler": "^2.2.4",
     "lucide-vue-next": "^1.0.0",
     "normalize.css": "^8.0.1",
     "pinia": "^3.0.0",
@@ -31,7 +33,7 @@
     "vue-i18n": "^11.0.0",
     "vue-router": "^4.5.0",
     "vue-sonner": "^2.0.9",
-    "vue3-youtube": "^0.1.9"
+    "youtube-video-element": "^1.9.0"
   },
   "devDependencies": {
     "@types/file-saver": "^2.0.7",

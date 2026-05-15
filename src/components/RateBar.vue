@@ -1,8 +1,5 @@
 <template>
-  <div
-    class="ratebar"
-    :style="{ width: `${props.width}px` }"
-  >
+  <div class="ratebar">
     <div
       class="ratebar-item"
       :style="{
@@ -57,10 +54,6 @@ const props = defineProps({
     type: Number,
     default: 0,
   },
-  width: {
-    type: Number,
-    default: 58,
-  },
 });
 
 const variantColor = computed(() => {
@@ -74,26 +67,16 @@ const variantColor = computed(() => {
 <style scoped>
 .ratebar {
   display: flex;
-  position: absolute;
-  bottom: -32px;
+  width: 100%;
   min-width: 720px;
-  border-radius: 0 0 12px 12px;
+  border-radius: 12px;
   overflow: hidden;
-  animation: ratebar-appear 0.3s ease-in;
+  animation: ratebar-appear 0.3s ease-out;
 }
 
 .ratebar-item {
-  height: 32px;
+  height: 22px;
   transition: width 0.2s ease;
 }
 
-@keyframes ratebar-appear {
-  0% {
-    bottom: 0;
-  }
-
-  100% {
-    bottom: -32px;
-  }
-}
 </style>

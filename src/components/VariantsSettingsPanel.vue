@@ -42,8 +42,7 @@
               removable
               @remove="
                 variant.words = variant.words.filter(
-                  (w: any) =>
-                    w.name.toLowerCase() != word.name.toLowerCase(),
+                  (w: any) => w.name.toLowerCase() != word.name.toLowerCase(),
                 )
               "
             />
@@ -72,14 +71,13 @@
                     :key="group.label"
                   >
                     <div v-if="filteredItems(group.items, search[num]).length">
-                      <div class="px-2 pt-2 pb-1 text-xs font-bold text-c1/60 uppercase tracking-wider">
+                      <div
+                        class="px-2 pt-2 pb-1 text-xs font-bold text-c1/60 uppercase tracking-wider"
+                      >
                         {{ group.label }}
                       </div>
                       <button
-                        v-for="emote in filteredItems(
-                          group.items,
-                          search[num],
-                        )"
+                        v-for="emote in filteredItems(group.items, search[num])"
                         :key="emote.name"
                         type="button"
                         class="w-full flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-[color-mix(in_oklab,var(--c4)_30%,transparent)] text-left text-sm font-bold text-c1 cursor-pointer transition-colors"
@@ -102,7 +100,11 @@
                     @click="commitText(num, variant)"
                   >
                     <Plus class="size-4 stroke-[3]" />
-                    <span>{{ $t('settings.selectTrigger') }}: "{{ search[num] }}"</span>
+                    <span
+                      >{{ $t('settings.selectTrigger') }}: "{{
+                        search[num]
+                      }}"</span
+                    >
                   </button>
                 </div>
               </PopoverContent>
@@ -352,7 +354,9 @@ const removeVariant = (num: number) => {
   background: transparent;
   color: var(--c1);
   cursor: pointer;
-  transition: background 0.12s ease, transform 0.08s ease;
+  transition:
+    background 0.12s ease,
+    transform 0.08s ease;
 }
 
 .add-trigger-btn:hover {
@@ -384,7 +388,9 @@ const removeVariant = (num: number) => {
   justify-content: center;
   cursor: pointer;
   box-shadow: var(--rim-shadow);
-  transition: transform 0.08s ease, box-shadow 0.15s ease;
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.15s ease;
 }
 
 .delete-btn:hover {
@@ -417,7 +423,9 @@ const removeVariant = (num: number) => {
   font-size: 16px;
   cursor: pointer;
   box-shadow: var(--rim-shadow-md);
-  transition: transform 0.08s ease, box-shadow 0.15s ease;
+  transition:
+    transform 0.08s ease,
+    box-shadow 0.15s ease;
 }
 
 .add-variant-btn:active {

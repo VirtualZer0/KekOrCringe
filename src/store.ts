@@ -37,6 +37,7 @@ interface IStoreState {
     stv: any[];
   };
   skipPoints: number;
+  sfxMuted: boolean;
 }
 
 export const useStore = defineStore('store', {
@@ -79,6 +80,7 @@ export const useStore = defineStore('store', {
       stv: [],
     },
     skipPoints: 10,
+    sfxMuted: false,
   }),
 
   actions: {

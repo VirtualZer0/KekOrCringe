@@ -1,20 +1,20 @@
 <script setup lang="ts">
-import type { HTMLAttributes } from 'vue'
-import { cn } from '@/lib/utils'
+import type { HTMLAttributes } from 'vue';
+import { cn } from '@/lib/utils';
 
-type Tone = 'c1' | 'c2' | 'c3' | 'c4' | 'c5'
+type Tone = 'c1' | 'c2' | 'c3' | 'c4' | 'c5';
 
 const props = withDefaults(
   defineProps<{
-    icon?: string
-    title?: string
-    tone?: Tone
-    class?: HTMLAttributes['class']
+    icon?: string;
+    title?: string;
+    tone?: Tone;
+    class?: HTMLAttributes['class'];
   }>(),
   {
     tone: 'c2',
   },
-)
+);
 </script>
 
 <template>

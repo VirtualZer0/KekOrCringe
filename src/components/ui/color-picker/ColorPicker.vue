@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const modelValue = defineModel<string>({ default: '#000000' })
+const modelValue = defineModel<string>({ default: '#000000' });
 </script>
 
 <template>

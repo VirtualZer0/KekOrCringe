@@ -179,6 +179,7 @@ import { useRouter } from 'vue-router';
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { spawnRandomParticle } from '@/utils/spawnParticle';
 import { getRandItem } from '@/utils/getRandItem';
+import { KEK_EMOJI, CRINGE_EMOJI, NEUTRAL_EMOJI } from '@/utils/emojiSets';
 
 const statistics = getStatistics(false);
 const router = useRouter();
@@ -188,9 +189,9 @@ const score =
 const winner = ref('kek');
 const winnerContainer = ref<HTMLElement>();
 const emojis = {
-  kek: ['😸', '🤩', '😁', '🤣', '✨', '🌸', '❤️'],
-  cringe: ['💔', '💢', '🚽', '👎', '😡', '😭', '💩'],
-  nothing: ['😶', '🤔', '😒', '👀', '💫', '☁️', '🌌'],
+  kek: KEK_EMOJI,
+  cringe: CRINGE_EMOJI,
+  nothing: NEUTRAL_EMOJI,
 };
 
 if (score > 0) {
@@ -420,12 +421,4 @@ onBeforeUnmount(() => {
   }
 }
 
-@keyframes winner-appear {
-  0% {
-    transform: scaleX(0);
-  }
-  100% {
-    transform: scaleX(1);
-  }
-}
 </style>

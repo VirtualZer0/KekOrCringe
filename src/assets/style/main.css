@@ -50,7 +50,7 @@
   --muted-foreground: oklch(0.556 0 0);
   --accent: oklch(0.97 0 0);
   --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
+  --destructive: var(--c5);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
   --ring: oklch(0.6017 0.094 178.84);
@@ -139,7 +139,8 @@
 
 @layer base {
   * {
-    @apply border-border outline-ring/50;
+    @apply border-border;
+    outline-color: transparent;
   }
 }
 
@@ -258,56 +259,6 @@ h1 {
   justify-content: center;
 }
 
-@keyframes page-appear {
-  0% {
-    opacity: 0;
-    transform: scale(0.5);
-  }
-
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-}
-
-@keyframes rise-in {
-  0% {
-    transform: translateY(16px);
-    opacity: 0;
-  }
-  100% {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-@keyframes drop-in {
-  0% {
-    transform: translateY(-460px) rotate(var(--rot, 0deg));
-    opacity: 0.2;
-  }
-  100% {
-    transform: translateY(0) rotate(var(--rot, 0deg));
-    opacity: 1;
-  }
-}
-
-@keyframes fadeout-element {
-  0% {
-    transform: translateY(-50%) translateX(-50%);
-    opacity: 1;
-  }
-
-  30% {
-    opacity: 1;
-  }
-
-  100% {
-    transform: translateY(-260px) translateX(-50%);
-    opacity: 0;
-  }
-}
-
 .particle {
   position: absolute;
   will-change: transform;
@@ -328,22 +279,6 @@ h1 {
 [data-slot='button'][data-variant='destructive']:active {
   @apply bevel-inset-sm;
   transform: translateY(var(--press-shift-sm));
-}
-
-@keyframes fadeUp {
-  0% {
-    transform: translateY(0px);
-    opacity: 0;
-  }
-
-  5% {
-    opacity: 1;
-  }
-
-  100% {
-    transform: translateY(-150px);
-    opacity: 0;
-  }
 }
 
 [data-sonner-toaster] {

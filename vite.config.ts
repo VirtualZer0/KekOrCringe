@@ -6,7 +6,16 @@ import { fileURLToPath, URL } from 'node:url'
 
 export default defineConfig(({ mode }) => ({
   base: mode === 'production' ? '/KekOrCringe/' : '/',
-  plugins: [vue(), tailwindcss()],
+  plugins: [
+    vue({
+      template: {
+        compilerOptions: {
+          isCustomElement: (tag) => tag === 'youtube-video',
+        },
+      },
+    }),
+    tailwindcss(),
+  ],
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

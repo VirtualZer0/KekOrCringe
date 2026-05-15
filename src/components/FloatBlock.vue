@@ -6,7 +6,12 @@
     aria-hidden="true"
   >
     <div
-      :class="['float-block', 'bevel-extrude-lg', `tone-${tone}`, `tilt-${side}`]"
+      :class="[
+        'float-block',
+        'bevel-extrude-lg',
+        `tone-${tone}`,
+        `tilt-${side}`,
+      ]"
       @click="spawn"
     >
       <span class="emoji">{{ emoji }}</span>
@@ -18,11 +23,12 @@
 import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { spawnRandomParticle } from '@/utils/spawnParticle';
 import { getRandItem } from '@/utils/getRandItem';
+import { KEK_EMOJI, CRINGE_EMOJI } from '@/utils/emojiSets';
 
 const props = defineProps<{
-  tone: 'kek' | 'cringe'
-  side: 'left' | 'right'
-  emoji: string
+  tone: 'kek' | 'cringe';
+  side: 'left' | 'right';
+  emoji: string;
 }>();
 
 const wrapRef = ref<HTMLElement>();
@@ -31,9 +37,9 @@ const my = ref(0);
 let rafId = 0;
 let spawnTimers: number[] = [];
 
-const emojiSets: Record<'kek' | 'cringe', string[]> = {
-  kek: ['😸', '🤩', '😁', '🤣', '✨', '🌸', '❤️'],
-  cringe: ['💔', '💢', '👎', '😡', '😭', '💩'],
+const emojiSets: Record<'kek' | 'cringe', readonly string[]> = {
+  kek: KEK_EMOJI,
+  cringe: CRINGE_EMOJI,
 };
 
 const spawn = () => {
@@ -153,37 +159,4 @@ onBeforeUnmount(() => {
   filter: drop-shadow(0 3px 2px rgba(0, 0, 0, 0.18));
 }
 
-@keyframes fly-in-left {
-  0% {
-    opacity: 0;
-    transform: translate(-80vw, -30vh) rotate(-180deg) scale(0.4);
-  }
-  60% {
-    opacity: 1;
-  }
-  80% {
-    transform: translate(8px, -6px) rotate(-4deg) scale(1.06);
-  }
-  100% {
-    opacity: 1;
-    transform: translate(0, 0) rotate(-10deg) scale(1);
-  }
-}
-
-@keyframes fly-in-right {
-  0% {
-    opacity: 0;
-    transform: translate(80vw, -30vh) rotate(180deg) scale(0.4);
-  }
-  60% {
-    opacity: 1;
-  }
-  80% {
-    transform: translate(-8px, -6px) rotate(4deg) scale(1.06);
-  }
-  100% {
-    opacity: 1;
-    transform: translate(0, 0) rotate(10deg) scale(1);
-  }
-}
 </style>

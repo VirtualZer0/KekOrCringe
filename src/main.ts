@@ -6,9 +6,11 @@ import locales from './locales';
 
 import 'normalize.css';
 import 'vue-sonner/style.css';
+import 'youtube-video-element';
 
 import '@/assets/style/colors.css';
 import '@/assets/style/main.css';
+import '@/assets/style/anim.css';
 import { useStore } from './store';
 import { createPinia } from 'pinia';
 import { getInitialLang } from '@/utils/locale';

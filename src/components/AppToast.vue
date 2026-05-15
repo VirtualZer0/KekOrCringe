@@ -45,11 +45,11 @@ import type { ToastTone } from '@/utils/notify';
 
 const props = withDefaults(
   defineProps<{
-    type: ToastTone
-    title: string
-    description?: string
-    action?: { label: string, onClick: () => void }
-    onCloseToast?: () => void
+    type: ToastTone;
+    title: string;
+    description?: string;
+    action?: { label: string; onClick: () => void };
+    onCloseToast?: () => void;
   }>(),
   {
     description: undefined,
