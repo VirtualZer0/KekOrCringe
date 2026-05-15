@@ -10,7 +10,8 @@ export default defineConfig(({ mode }) => ({
     vue({
       template: {
         compilerOptions: {
-          isCustomElement: (tag) => tag === 'youtube-video',
+          isCustomElement: (tag) =>
+            tag === 'youtube-video' || tag === 'tiktok-video',
         },
       },
     }),

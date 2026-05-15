@@ -22,6 +22,7 @@ import CircleAnim from './components/CircleAnim.vue';
 import { Toaster } from '@/components/ui/sonner';
 
 const ROUTE_ANIM_MS = 210;
+const DEFAULT_ANIM_COLOR = '#e9c46a';
 
 const router = useRouter();
 const inAnim = ref({
@@ -36,17 +37,27 @@ const outAnim = ref({
   isTop: true,
 });
 
+// Track navigation timers so a fast re-navigation supersedes the previous
+// animation's pending state changes instead of letting stale timeouts fire
+// against the newer route.
+let beforeEachTimer: number | null = null;
+let afterEachTimer: number | null = null;
+
 router.beforeEach((to, from, next) => {
   if (to.name == 'Main') {
     next();
     return;
   }
-  outAnim.value.color = from.meta.color as string;
+  outAnim.value.color = (from.meta.color as string) || DEFAULT_ANIM_COLOR;
   outAnim.value.isTop = true;
   outAnim.value.enable = true;
-  inAnim.value.color = to.meta.color as string;
+  inAnim.value.color = (to.meta.color as string) || DEFAULT_ANIM_COLOR;
+  if (beforeEachTimer !== null) clearTimeout(beforeEachTimer);
   nextTick(() => {
-    setTimeout(() => next(), ROUTE_ANIM_MS);
+    beforeEachTimer = window.setTimeout(() => {
+      beforeEachTimer = null;
+      next();
+    }, ROUTE_ANIM_MS);
   });
 });
 
@@ -54,10 +65,13 @@ router.afterEach((to) => {
   if (to.name == 'Main') return;
   outAnim.value.isTop = false;
   inAnim.value.enable = true;
-  document.body.style.backgroundColor = to.meta.color as string;
+  document.body.style.backgroundColor =
+    (to.meta.color as string) || DEFAULT_ANIM_COLOR;
 
+  if (afterEachTimer !== null) clearTimeout(afterEachTimer);
   nextTick(() => {
-    setTimeout(() => {
+    afterEachTimer = window.setTimeout(() => {
+      afterEachTimer = null;
       outAnim.value.enable = false;
       inAnim.value.enable = false;
     }, ROUTE_ANIM_MS);

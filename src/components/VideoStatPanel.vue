@@ -16,7 +16,7 @@
         <a
           v-if="item.video"
           class="stat-video"
-          :href="`https://youtu.be/${item.video.id}`"
+          :href="videoUrl(item.video)"
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -25,6 +25,7 @@
               class="stat-preview-img"
               :src="item.video.preview"
               alt=""
+              @error="hideBrokenImage"
             />
             <div class="stat-badge">
               <span class="stat-count">{{ item.video.voteCount }}</span>
@@ -67,6 +68,23 @@ withDefaults(
   }>(),
   { delay: 0 },
 );
+
+const videoUrl = (video: StatisticsVideo): string => {
+  switch (video.platform) {
+    case 'tiktok':
+      return `https://www.tiktok.com/share/video/${video.id}`;
+    case 'twitch':
+      return `https://clips.twitch.tv/${video.id}`;
+    case 'youtube':
+    default:
+      return `https://youtu.be/${video.id}`;
+  }
+};
+
+const hideBrokenImage = (e: Event) => {
+  const img = e.target as HTMLImageElement | null;
+  if (img) img.style.display = 'none';
+};
 </script>
 
 <style scoped>

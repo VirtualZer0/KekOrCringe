@@ -90,6 +90,7 @@
             v-model="videoSettings.durationFrom"
             :step="0.1"
             :min="0"
+            :max="videoSettings.durationTo"
             :format-options="{
               minimumFractionDigits: 1,
               maximumFractionDigits: 1,
@@ -123,7 +124,10 @@
       </div>
 
       <div class="field">
-        <Label>{{ $t('settings.viewCount') }}</Label>
+        <Label>
+          {{ $t('settings.viewCount') }}
+          <PlatformBadges :platforms="['youtube', 'twitch']" />
+        </Label>
         <NumberField
           v-model="videoSettings.viewCount"
           :step="1"
@@ -185,6 +189,49 @@
           </Label>
         </div>
       </div>
+
+      <div class="field platforms-field">
+        <Label>{{ $t('settings.platforms') }}</Label>
+        <div class="checkbox-row">
+          <Checkbox
+            id="acceptYoutube"
+            :model-value="acceptYoutube"
+            @update:model-value="togglePlatform('youtube', $event === true)"
+          />
+          <Label
+            for="acceptYoutube"
+            class="cursor-pointer"
+          >
+            {{ $t('settings.acceptYoutube') }}
+          </Label>
+        </div>
+        <div class="checkbox-row">
+          <Checkbox
+            id="acceptTiktok"
+            :model-value="acceptTiktok"
+            @update:model-value="togglePlatform('tiktok', $event === true)"
+          />
+          <Label
+            for="acceptTiktok"
+            class="cursor-pointer"
+          >
+            {{ $t('settings.acceptTiktok') }}
+          </Label>
+        </div>
+        <div class="checkbox-row">
+          <Checkbox
+            id="acceptTwitch"
+            :model-value="acceptTwitch"
+            @update:model-value="togglePlatform('twitch', $event === true)"
+          />
+          <Label
+            for="acceptTwitch"
+            class="cursor-pointer"
+          >
+            {{ $t('settings.acceptTwitch') }}
+          </Label>
+        </div>
+      </div>
     </div>
   </ChunkyPanel>
 </template>
@@ -209,9 +256,12 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { useStore } from '@/store';
 import { useI18n } from 'vue-i18n';
-import { computed, ref, watch } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { getRewardStyle } from '@/utils/getRewardStyle';
 import RewardsWindow from './RewardsWindow.vue';
+import { notify } from '@/utils/notify';
+import type { VideoPlatform } from '@/utils/videoSources/types';
+import PlatformBadges from '@/components/PlatformBadges.vue';
 
 const store = useStore();
 const { t } = useI18n();
@@ -227,11 +277,16 @@ const props = defineProps({
 const emits = defineEmits(['change']);
 
 const videoSettings = ref(props.videoSettingsIn);
-watch(videoSettings, (newVal) => {
-  emits('change', newVal);
-});
+watch(
+  videoSettings,
+  (newVal) => {
+    emits('change', newVal);
+  },
+  { deep: true },
+);
 
-const addMethods = [
+// Computed so labels update when the user switches locales mid-page.
+const addMethods = computed(() => [
   {
     name: t('settings.addMethodSimple'),
     code: 'message',
@@ -244,7 +299,17 @@ const addMethods = [
     name: t('settings.addMethodBits'),
     code: 'bits',
   },
-];
+]);
+
+// Keep durationFrom ≤ durationTo even if user types a higher value directly.
+watch(
+  () => videoSettings.value.durationFrom,
+  (val) => {
+    if (typeof val === 'number' && val > videoSettings.value.durationTo) {
+      videoSettings.value.durationFrom = videoSettings.value.durationTo;
+    }
+  },
+);
 
 const selectedReward = computed(() => {
   return (
@@ -253,6 +318,40 @@ const selectedReward = computed(() => {
     ) ?? null
   );
 });
+
+onMounted(() => {
+  if (
+    !Array.isArray(videoSettings.value.enabledPlatforms) ||
+    videoSettings.value.enabledPlatforms.length === 0
+  ) {
+    videoSettings.value.enabledPlatforms = ['youtube', 'tiktok', 'twitch'];
+  }
+});
+
+const acceptYoutube = computed(() =>
+  (videoSettings.value.enabledPlatforms ?? []).includes('youtube'),
+);
+
+const acceptTiktok = computed(() =>
+  (videoSettings.value.enabledPlatforms ?? []).includes('tiktok'),
+);
+
+const acceptTwitch = computed(() =>
+  (videoSettings.value.enabledPlatforms ?? []).includes('twitch'),
+);
+
+const togglePlatform = (platform: VideoPlatform, val: boolean) => {
+  const next = new Set<VideoPlatform>(
+    videoSettings.value.enabledPlatforms ?? [],
+  );
+  if (val) next.add(platform);
+  else next.delete(platform);
+  if (next.size === 0) {
+    notify.warning(t('settings.atLeastOnePlatform'));
+    return;
+  }
+  videoSettings.value.enabledPlatforms = Array.from(next);
+};
 </script>
 <style scoped>
 .form-grid {
@@ -292,5 +391,13 @@ const selectedReward = computed(() => {
   align-items: center;
   gap: 14px;
   height: 44px;
+}
+
+.platforms-field {
+  grid-column: span 2;
+}
+
+.platforms-field .checkbox-row {
+  height: 32px;
 }
 </style>

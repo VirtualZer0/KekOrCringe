@@ -94,7 +94,11 @@ const props = defineProps({
 });
 
 const store = useStore();
-let variantRefs: Record<string, any> = {};
+// Stable reference shared with the parent — clear in place between updates
+// so any stray dereference during the update cycle hits the new entries,
+// not a detached array. Re-assigning would briefly leave the parent reading
+// stale refs.
+const variantRefs: Record<string, any> = {};
 
 const emits = defineEmits(['init', 'vote']);
 
@@ -109,7 +113,7 @@ const variantEmote = computed(() => {
 onMounted(() => emits('init', variantRefs));
 
 onBeforeUpdate(() => {
-  variantRefs = [];
+  for (const key in variantRefs) delete variantRefs[key];
 });
 
 onUpdated(() => emits('init', variantRefs));

@@ -210,9 +210,13 @@ const triggerVariants = computed(() => [
 ]);
 
 const variantsSettings = ref<any>(props.variantsSettingsIn);
-watch(variantsSettings, (newVal) => {
-  emits('change', newVal);
-});
+watch(
+  variantsSettings,
+  (newVal) => {
+    emits('change', newVal);
+  },
+  { deep: true },
+);
 
 const search = ref<string[]>([]);
 const pickerOpen = ref<boolean[]>([]);
@@ -230,8 +234,15 @@ const exactMatchExists = (q: string) => {
   );
 };
 
-const wordExists = (variant: any, name: string) =>
-  variant.words.some((w: any) => w.name.toLowerCase() === name.toLowerCase());
+// A trigger word may only belong to a single variant — otherwise
+// `handleUserMessage` returns the first match and later variants become
+// unreachable. Enforce uniqueness across ALL variants, not just the current.
+const wordExists = (_variant: any, name: string) => {
+  const lower = name.toLowerCase();
+  return variantsSettings.value.some((v: any) =>
+    v.words.some((w: any) => w.name.toLowerCase() === lower),
+  );
+};
 
 const addEmote = (num: number, variant: any, emote: Emote) => {
   if (!wordExists(variant, emote.name)) {

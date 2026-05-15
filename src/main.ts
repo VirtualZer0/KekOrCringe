@@ -7,6 +7,7 @@ import locales from './locales';
 import 'normalize.css';
 import 'vue-sonner/style.css';
 import 'youtube-video-element';
+import 'tiktok-video-element';
 
 import '@/assets/style/colors.css';
 import '@/assets/style/main.css';

@@ -149,6 +149,51 @@ const importSettings = () => {
         reader.onload = (readerEvent) => {
           try {
             const content = (readerEvent.target as FileReader).result;
+            const parsed = JSON.parse(content as string);
+
+            // Strict shape validation — must be a plain object
+            if (
+              !parsed ||
+              typeof parsed !== 'object' ||
+              Array.isArray(parsed)
+            ) {
+              throw new Error('Settings file must contain a plain object');
+            }
+
+            // Per-field type checks: every field that exists in the payload
+            // must have the right type. Reject the whole import on mismatch
+            // so we don't half-patch the store into a corrupted state.
+            const isPlainObject = (v: unknown) =>
+              v !== null && typeof v === 'object' && !Array.isArray(v);
+            const fieldChecks: Record<string, (v: unknown) => boolean> = {
+              firstTime: (v) => typeof v === 'boolean',
+              channel: (v) => typeof v === 'string',
+              twitchId: (v) => v === null || typeof v === 'string',
+              rewardsCache: (v) => Array.isArray(v),
+              videoSettings: isPlainObject,
+              variantsSettings: (v) => Array.isArray(v),
+              emotesCache: isPlainObject,
+              skipPoints: (v) => typeof v === 'number',
+              sfxMuted: (v) => typeof v === 'boolean',
+            };
+            for (const [key, check] of Object.entries(fieldChecks)) {
+              if (key in parsed && !check((parsed as any)[key])) {
+                throw new Error(`Invalid type for field "${key}"`);
+              }
+            }
+
+            // Variants must each be a plain object with a string name
+            if (Array.isArray(parsed.variantsSettings)) {
+              for (const variant of parsed.variantsSettings) {
+                if (
+                  !isPlainObject(variant) ||
+                  typeof variant.name !== 'string'
+                ) {
+                  throw new Error('Invalid variant entry');
+                }
+              }
+            }
+
             store.$reset();
 
             // Snapshot defaults so we can restore kek/cringe if the import drops them
@@ -163,7 +208,7 @@ const importSettings = () => {
               ),
             );
 
-            store.$patch(JSON.parse(content as string));
+            store.$patch(parsed);
 
             // Enforce permanent invariants for kek/cringe regardless of import shape
             const kekEntry = store.variantsSettings.find(

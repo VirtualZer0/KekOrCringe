@@ -29,42 +29,54 @@
             current: video.id == props.currentPlaying,
           }"
         >
-          <div
-            v-if="video.id == props.currentPlaying"
-            class="current-pill"
-          >
-            <Play class="size-3" />
-            {{ $t('current') }}
+          <div class="thumbnail">
+            <img
+              :src="video.preview"
+              :alt="video.title"
+            />
+            <span
+              class="platform-pill"
+              :class="`platform-${video.platform}`"
+            >
+              {{ platformLabel(video.platform) }}
+            </span>
           </div>
-          <img
-            :src="video.preview"
-            :alt="video.title"
-          />
           <div class="right">
             <div class="title">{{ video.title }}</div>
             <div class="stats">
               <div class="stat"><User class="size-4" /> {{ video.user }}</div>
-              <div class="stat">
+              <div
+                v-if="video.viewCount > 0"
+                class="stat"
+              >
                 <Eye class="size-4" /> {{ video.viewCount }}
               </div>
-              <div class="stat">
+              <div
+                v-if="video.duration > 0"
+                class="stat"
+              >
                 <Clock class="size-4" />
-                {{
-                  new Date(video.duration * 1000)
-                    .toISOString()
-                    .substring(14, 19)
-                }}
+                {{ formatDuration(video.duration) }}
               </div>
             </div>
           </div>
-          <Button
-            variant="destructive"
-            size="icon"
-            class="remove"
-            @click="emits('remove', video.id)"
-          >
-            <Trash2 class="size-4" />
-          </Button>
+          <div class="actions">
+            <Button
+              size="icon"
+              class="open"
+              @click="openVideo(video)"
+            >
+              <ExternalLink class="size-4" />
+            </Button>
+            <Button
+              variant="destructive"
+              size="icon"
+              class="remove"
+              @click="emits('remove', video.id)"
+            >
+              <Trash2 class="size-4" />
+            </Button>
+          </div>
         </div>
       </div>
       <Button
@@ -79,7 +91,7 @@
   </Sheet>
 </template>
 <script lang="ts" setup>
-import { IVideoData } from '@/utils/YTUtils';
+import type { IVideoData, VideoPlatform } from '@/utils/videoSources/types';
 import {
   Sheet,
   SheetContent,
@@ -88,7 +100,14 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
-import { Trash2, Eye, Clock, User, Clapperboard, Play } from 'lucide-vue-next';
+import {
+  Trash2,
+  Eye,
+  Clock,
+  User,
+  Clapperboard,
+  ExternalLink,
+} from 'lucide-vue-next';
 import { PropType } from 'vue';
 
 const emits = defineEmits(['close', 'remove', 'clear']);
@@ -109,6 +128,47 @@ const props = defineProps({
     default: '',
   },
 });
+
+const platformLabel = (p: VideoPlatform): string =>
+  p === 'youtube' ? 'YouTube' : p === 'tiktok' ? 'TikTok' : 'Twitch';
+
+const pad2 = (n: number) => n.toString().padStart(2, '0');
+
+const formatDuration = (seconds: number): string => {
+  if (!isFinite(seconds) || seconds <= 0) return '00:00';
+  const total = Math.floor(seconds);
+  const h = Math.floor(total / 3600);
+  const m = Math.floor((total % 3600) / 60);
+  const s = total % 60;
+  return h > 0 ? `${h}:${pad2(m)}:${pad2(s)}` : `${pad2(m)}:${pad2(s)}`;
+};
+
+const openVideo = (video: IVideoData) => {
+  let url: string;
+  let size: string;
+  switch (video.platform) {
+    case 'youtube':
+      url = `https://www.youtube.com/watch?v=${video.id}`;
+      size = 'width=720,height=480';
+      break;
+    case 'tiktok':
+      url = `https://www.tiktok.com/share/video/${video.id}`;
+      size = 'width=405,height=720';
+      break;
+    case 'twitch':
+      url = `https://clips.twitch.tv/${video.id}`;
+      size = 'width=720,height=480';
+      break;
+  }
+  // Belt-and-suspenders against reverse tab-nabbing: the feature-string flags
+  // are unreliable on some Safari versions, so null the opener after open too.
+  const newWindow = window.open(
+    url,
+    '_blank',
+    `noopener,noreferrer,popup,${size}`,
+  );
+  if (newWindow) newWindow.opener = null;
+};
 </script>
 <style>
 /* Non-scoped: SheetContent portals to document.body, losing the parent's scope attribute */
@@ -260,16 +320,54 @@ const props = defineProps({
       color: var(--c1);
       border-color: transparent;
       --bevel-color: color-mix(in srgb, var(--c3) 60%, black);
-      padding-top: 32px;
     }
 
-    img {
+    .thumbnail {
+      position: relative;
       width: 132px;
       flex-shrink: 0;
+      align-self: center;
+    }
+
+    .thumbnail img {
+      width: 100%;
+      display: block;
       border-radius: 10px;
       object-fit: cover;
-      align-self: center;
       border: none;
+    }
+
+    .platform-pill {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      padding: 3px 9px;
+      color: #fff;
+      border-radius: 999px;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      line-height: 1;
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, 0.25),
+        0 2px 0 var(--bevel-color),
+        0 4px 6px rgba(0, 0, 0, 0.25);
+    }
+
+    .platform-pill.platform-youtube {
+      background: #ff0033;
+      --bevel-color: #99001f;
+    }
+
+    .platform-pill.platform-tiktok {
+      background: #111;
+      --bevel-color: #000;
+    }
+
+    .platform-pill.platform-twitch {
+      background: #9146ff;
+      --bevel-color: #5a1ab3;
     }
 
     .right {
@@ -306,33 +404,20 @@ const props = defineProps({
       opacity: 0.95;
     }
 
-    .current-pill {
-      position: absolute;
-      top: 8px;
-      left: 12px;
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      padding: 3px 10px;
-      background: var(--c1);
-      color: var(--c-surface);
-      border-radius: 999px;
-      font-size: 11px;
-      font-weight: 800;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-    }
-
-    .remove {
+    .actions {
       flex-shrink: 0;
       align-self: flex-end;
+      display: flex;
+      gap: 8px;
+    }
+
+    .open,
+    .remove {
       width: 38px;
       height: 38px;
       border-radius: 10px;
       border: none;
-      background: var(--c5);
       color: var(--c-surface);
-      --bevel-color: color-mix(in srgb, var(--c5) 65%, black);
       box-shadow:
         inset 0 1px 0 rgba(255, 255, 255, 0.25),
         0 3px 0 var(--bevel-color),
@@ -345,6 +430,16 @@ const props = defineProps({
           0 1px 0 var(--bevel-color),
           0 2px 4px rgba(0, 0, 0, 0.18);
       }
+    }
+
+    .open {
+      background: var(--c2);
+      --bevel-color: color-mix(in srgb, var(--c2) 65%, black);
+    }
+
+    .remove {
+      background: var(--c5);
+      --bevel-color: color-mix(in srgb, var(--c5) 65%, black);
     }
   }
 }

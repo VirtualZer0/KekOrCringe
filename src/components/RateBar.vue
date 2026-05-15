@@ -4,11 +4,7 @@
       class="ratebar-item"
       :style="{
         backgroundColor: variantColor['kek'],
-        width:
-          ((votes['kek'].length + 1) /
-            (voteCount + Object.keys(props.votes).length)) *
-            100 +
-          '%',
+        width: barWidth('kek'),
       }"
     />
     <div
@@ -19,22 +15,14 @@
       class="ratebar-item"
       :style="{
         backgroundColor: variantColor[vote],
-        width:
-          ((votes[vote].length + 1) /
-            (voteCount + Object.keys(props.votes).length)) *
-            100 +
-          '%',
+        width: barWidth(vote),
       }"
     />
     <div
       class="ratebar-item"
       :style="{
         backgroundColor: variantColor['cringe'],
-        width:
-          ((votes['cringe'].length + 1) /
-            (voteCount + Object.keys(props.votes).length)) *
-            100 +
-          '%',
+        width: barWidth('cringe'),
       }"
     />
   </div>
@@ -63,6 +51,18 @@ const variantColor = computed(() => {
   });
   return voteParams;
 });
+
+// When there are zero votes, show each variant at an equal share so the bar
+// doesn't render blank. Once any vote lands, switch to true proportions —
+// avoiding the previous bug where 1 kek vote rendered as ~67% kek / 33% cringe.
+const barWidth = (name: string): string => {
+  const variantCount = Object.keys(props.votes).length || 1;
+  if (props.voteCount <= 0) {
+    return `${100 / variantCount}%`;
+  }
+  const count = props.votes[name]?.length ?? 0;
+  return `${(count / props.voteCount) * 100}%`;
+};
 </script>
 <style scoped>
 .ratebar {
@@ -78,5 +78,4 @@ const variantColor = computed(() => {
   height: 22px;
   transition: width 0.2s ease;
 }
-
 </style>

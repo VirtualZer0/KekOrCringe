@@ -1,4 +1,5 @@
 import { defineStore } from 'pinia';
+import type { VideoPlatform } from '@/utils/videoSources/types';
 
 interface IVideoSettings {
   addVideoMethod: 'reward' | 'message' | 'bits';
@@ -11,6 +12,7 @@ interface IVideoSettings {
   banwordsFilter: boolean;
   skipCount: number;
   autoSwitch: boolean;
+  enabledPlatforms: VideoPlatform[];
 }
 
 interface IVariant {
@@ -57,6 +59,7 @@ export const useStore = defineStore('store', {
       banwordsFilter: true,
       skipCount: 10,
       autoSwitch: true,
+      enabledPlatforms: ['youtube', 'tiktok', 'twitch'],
     },
     variantsSettings: [
       {
@@ -117,8 +120,17 @@ export const useStore = defineStore('store', {
     },
 
     load() {
-      if (localStorage['store']) {
-        this.$patch(JSON.parse(localStorage['store']));
+      const raw = localStorage['store'];
+      if (!raw) return;
+      try {
+        const parsed = JSON.parse(raw);
+        if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+          this.$patch(parsed);
+        } else {
+          localStorage.removeItem('store');
+        }
+      } catch {
+        localStorage.removeItem('store');
       }
     },
   },

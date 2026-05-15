@@ -53,18 +53,18 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useStore } from '@/store'
+import { computed } from 'vue';
+import { useStore } from '@/store';
 
 const emit = defineEmits<{
-  trigger: [rate: string, strong: boolean]
-}>()
+  trigger: [rate: string, strong: boolean];
+}>();
 
-const store = useStore()
+const store = useStore();
 
 const customVariants = computed(() =>
   store.variantsSettings.filter((v) => !v.permanent),
-)
+);
 </script>
 
 <style scoped>

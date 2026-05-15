@@ -93,13 +93,12 @@
               />
               <span class="launch-label">{{ $t('videoWait') }}</span>
             </div>
-            <youtube-video
-              v-if="currentVote.videoId"
-              :src="`https://www.youtube.com/watch?v=${currentVote.videoId}`"
-              autoplay
-              controls
-              playsinline
+            <UniversalPlayer
+              v-if="currentVideo"
+              :video="currentVideo"
               class="yt-player"
+              @durationchange="onPlayerDuration"
+              @error="onPlayerError"
             />
             <div
               v-if="currentVote.videoId"
@@ -142,11 +141,13 @@
 
 <script setup lang="ts">
 import {
-  getVideoStats,
-  getYTLink,
-  getYTVideoId,
-  IVideoData,
-} from '@/utils/YTUtils';
+  extractVideoLink,
+  fetchVideoMetadata,
+  tryExtractVideoId,
+} from '@/utils/videoSources';
+import type { IVideoData } from '@/utils/videoSources/types';
+import UniversalPlayer from '@/components/UniversalPlayer.vue';
+import { useVideoQueue } from '@/composables/useVideoQueue';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Images, Power, FastForward, Volume2, VolumeX } from 'lucide-vue-next';
@@ -154,7 +155,7 @@ import VideoResult from '@/components/VideoResult.vue';
 import ResultDebugPanel from '@/components/dev/ResultDebugPanel.vue';
 import { computed, onBeforeUnmount, onMounted, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import { createEmptyStatBlock, getStatistics } from '@/utils/statisticsUtils';
+import { getStatistics } from '@/utils/statisticsUtils';
 import { useStore } from '@/store';
 import { spawnFadeout } from '@/utils/spawnFadeout';
 import { getRandItem } from '@/utils/getRandItem';
@@ -250,8 +251,6 @@ const recalcStatistics = (winner: 'cringe' | 'kek') => {
       };
     }
   });
-
-  localStorage['statistics'] = JSON.stringify(statistics.value);
 };
 
 const showErrToast = (msg: string) => {
@@ -267,7 +266,7 @@ const addVote = (variant: string, user: string) => {
   const emotes = varParams?.words.filter((w) => w.url);
 
   if (emotes && emotes.length > 0) {
-    spawnFadeout(variantRefs[variant].$el, 'img', getRandItem(emotes).url);
+    spawnFadeout(variantRefs[variant]?.$el, 'img', getRandItem(emotes).url);
   } else {
     switch (variant) {
       case 'kek':
@@ -293,17 +292,16 @@ const addVote = (variant: string, user: string) => {
 
   Object.entries(currentVote.value.votes).forEach((vote) => {
     if (vote[1].includes(user)) {
-      currentVote.value.skipCount += store.variantsSettings.find(
-        (v) => v.name == vote[0],
-      )?.skipModifier as number;
+      currentVote.value.skipCount +=
+        store.variantsSettings.find((v) => v.name == vote[0])?.skipModifier ??
+        0;
       currentVote.value.votes[vote[0]] = vote[1].filter((v) => v != user);
       currentVote.value.voteCount--;
     }
   });
 
-  currentVote.value.skipCount -= store.variantsSettings.find(
-    (v) => v.name == variant,
-  )?.skipModifier as number;
+  currentVote.value.skipCount -=
+    store.variantsSettings.find((v) => v.name == variant)?.skipModifier ?? 0;
   currentVote.value.votes[variant].push(user);
   currentVote.value.voteCount++;
 
@@ -312,16 +310,34 @@ const addVote = (variant: string, user: string) => {
   }
 };
 
-const videoList = ref<Record<string, IVideoData>>({});
-if (localStorage.getItem('videoList')) {
-  videoList.value = JSON.parse(localStorage.getItem('videoList') as string);
-}
+const {
+  videoList,
+  add: queueAdd,
+  remove: queueRemove,
+  updateDuration: queueUpdateDuration,
+  clear: queueClear,
+} = useVideoQueue();
 
-const statistics = ref(getStatistics());
-statistics.value.current = createEmptyStatBlock();
-localStorage['statistics'] = JSON.stringify(statistics.value);
+const currentVideo = computed<IVideoData | null>(() =>
+  currentVote.value.videoId
+    ? (videoList.value[currentVote.value.videoId] ?? null)
+    : null,
+);
 
-const pendingVideoIds = new Set<string>();
+// Use `clearCurrent: false` — current stats are cleared by SettingsPage's
+// Run button (= explicit "new run"), not by an accidental page reload.
+const statistics = ref(getStatistics(false));
+
+const persistStatistics = () => {
+  try {
+    localStorage['statistics'] = JSON.stringify(statistics.value);
+  } catch (e) {
+    console.error('Failed to persist statistics', e);
+  }
+};
+
+const pendingFetches = new Set<string>();
+let isMounted = true;
 
 /** Check user message and add video or vote */
 const handleUserMessage = async (
@@ -331,46 +347,64 @@ const handleUserMessage = async (
 ) => {
   // Check if msg contains video
   if (type == store.videoSettings.addVideoMethod) {
-    const vid = getYTLink(msg);
-    if (vid) {
-      const id = getYTVideoId(vid);
-      if (!id) return;
+    const match = extractVideoLink(msg, store.videoSettings.enabledPlatforms);
+    if (match) {
+      // Dedup by platform:id when we can extract it synchronously; otherwise
+      // fall back to the URL string. This collapses YT alias submissions
+      // (youtu.be/X vs youtube.com/watch?v=X) into one pending slot.
+      const earlyId = tryExtractVideoId(match.url, match.platform);
+      const pendingKey = earlyId
+        ? `${match.platform}:${earlyId}`
+        : `url:${match.url}`;
 
-      if (Object.keys(videoList.value).length >= store.videoSettings.queueSize)
+      const reservedCount =
+        Object.keys(videoList.value).length + pendingFetches.size;
+      if (reservedCount >= store.videoSettings.queueSize)
         return showErrToast(`${user}: ${t('queueIsFull')}`);
 
-      if (videoList.value[id] || pendingVideoIds.has(id))
+      if (earlyId && videoList.value[earlyId])
         return showErrToast(`${user}: ${t('alreadyExistsVideo')}`);
 
-      pendingVideoIds.add(id);
+      if (pendingFetches.has(pendingKey))
+        return showErrToast(`${user}: ${t('alreadyExistsVideo')}`);
+
+      pendingFetches.add(pendingKey);
       try {
-        const data = await getVideoStats(vid, user, {
+        const data = await fetchVideoMetadata(match.url, match.platform, user, {
           filterBadwords: store.videoSettings.banwordsFilter,
         });
+
+        if (!isMounted) return;
 
         if (data.err) {
           const err = t(`${data.err}Video`);
           return showErrToast(`${user}: ${err}`);
         }
 
-        if (
-          (data.video?.duration as number) >
-          store.videoSettings.durationTo * 60
-        )
-          return showErrToast(`${user}: ${t('tooLongVideo')}`);
+        const video = data.video as IVideoData;
+
+        if (videoList.value[video.id])
+          return showErrToast(`${user}: ${t('alreadyExistsVideo')}`);
+
+        if (video.duration > 0) {
+          if (video.duration > store.videoSettings.durationTo * 60)
+            return showErrToast(`${user}: ${t('tooLongVideo')}`);
+          if (video.duration < store.videoSettings.durationFrom * 60)
+            return showErrToast(`${user}: ${t('tooShortVideo')}`);
+        }
 
         if (
-          (data.video?.duration as number) <
-          store.videoSettings.durationFrom * 60
+          (video.platform === 'youtube' || video.platform === 'twitch') &&
+          // viewCount === 0 is also the "missing statistics" sentinel — skip
+          // the floor check when we don't actually have a known view count.
+          video.viewCount > 0 &&
+          video.viewCount < store.videoSettings.viewCount
         )
-          return showErrToast(`${user}: ${t('tooShortVideo')}`);
-
-        if ((data.video?.viewCount as number) < store.videoSettings.viewCount)
           return showErrToast(`${user}: ${t('notEnoughViewsVideo')}`);
 
-        return addVideoToList(data.video as IVideoData);
+        return addVideoToList(video);
       } finally {
-        pendingVideoIds.delete(id);
+        pendingFetches.delete(pendingKey);
       }
     }
   }
@@ -386,13 +420,11 @@ const handleUserMessage = async (
 
 /** Add new video to queue */
 const addVideoToList = (video: IVideoData) => {
-  videoList.value[video.id] = video;
+  queueAdd(video);
 
   if (!currentVote.value.videoId) {
     setActiveVideo(video.id);
   }
-
-  localStorage['videoList'] = JSON.stringify(videoList.value);
 };
 
 /** Launch  selected video or stop current if videoId is null */
@@ -438,6 +470,9 @@ const launchResult = () => {
   if (winner == 'kek' || winner == 'cringe') {
     recalcStatistics(winner);
   }
+  // Persist for every round so allVideos increments survive reloads even
+  // on neutral/custom-winner rounds (not just kek/cringe).
+  persistStatistics();
 
   if (winner !== 'neutral') {
     const winnerVoteCount = currentVote.value.votes[winner]?.length ?? 0;
@@ -453,16 +488,19 @@ const launchResult = () => {
 
   result.value.show = true;
 
+  // Capture the video that just finished. If the user manually removes /
+  // skips during the 3.7 s result overlay, `currentVote.videoId` will have
+  // moved on, and we must not delete that next video by accident.
+  const finishedVideoId = currentVote.value.videoId;
+
   if (resultTimer !== null) clearTimeout(resultTimer);
   resultTimer = window.setTimeout(() => {
     result.value.show = false;
-    removeVideoFromList(currentVote.value.videoId ?? '');
-    if (Object.keys(videoList.value).length > 0) {
-      setActiveVideo(Object.values(videoList.value)[0].id);
-    } else {
-      setActiveVideo(null);
-    }
     resultTimer = null;
+    // No-op if the user already advanced past this video.
+    if (finishedVideoId === null) return;
+    if (currentVote.value.videoId !== finishedVideoId) return;
+    removeVideoFromList(finishedVideoId);
   }, 3700);
 };
 
@@ -479,15 +517,13 @@ const debugTriggerResult = (rate: string, strong: boolean) => {
 };
 
 const clearQueue = () => {
-  videoList.value = {};
-  localStorage['videoList'] = JSON.stringify(videoList.value);
+  queueClear();
   setActiveVideo(null);
 };
 
 /** Remove selected video from queue */
 const removeVideoFromList = (videoId: string) => {
-  delete videoList.value[videoId];
-  localStorage['videoList'] = JSON.stringify(videoList.value);
+  queueRemove(videoId);
 
   if (videoId == currentVote.value.videoId) {
     if (Object.keys(videoList.value).length > 0) {
@@ -496,6 +532,34 @@ const removeVideoFromList = (videoId: string) => {
       setActiveVideo(null);
     }
   }
+};
+
+const onPlayerDuration = (sourceId: string, seconds: number) => {
+  if (sourceId !== currentVote.value.videoId) return;
+  const video = videoList.value[sourceId];
+  if (!video || video.platform !== 'tiktok') return;
+  if (video.duration === seconds) return;
+
+  queueUpdateDuration(sourceId, seconds);
+
+  if (!currentVote.value.isActive) return;
+
+  const maxSec = store.videoSettings.durationTo * 60;
+  const minSec = store.videoSettings.durationFrom * 60;
+  if (seconds > maxSec) {
+    showErrToast(`${video.user}: ${t('tooLongVideo')}`);
+    removeVideoFromList(sourceId);
+  } else if (seconds < minSec) {
+    showErrToast(`${video.user}: ${t('tooShortVideo')}`);
+    removeVideoFromList(sourceId);
+  }
+};
+
+const onPlayerError = (sourceId: string) => {
+  if (sourceId !== currentVote.value.videoId) return;
+  if (!currentVote.value.isActive) return;
+  showErrToast(t('embedFailedVideo'));
+  removeVideoFromList(sourceId);
 };
 
 // Chat events
@@ -556,6 +620,14 @@ const validateRewardSetting = () => {
 };
 
 onMounted(() => {
+  // Direct `#/run` entry with no channel configured would create a TMI
+  // client for "" and produce a confusing chat-error toast. Send the user
+  // back to the start instead.
+  if (!store.channel || !store.channel.trim()) {
+    router.push('/');
+    return;
+  }
+
   validateRewardSetting();
 
   chat.create(store.channel);
@@ -567,6 +639,7 @@ onMounted(() => {
 });
 
 onBeforeUnmount(() => {
+  isMounted = false;
   chat.off('Bits', tryUseBits);
   chat.off('Reward', tryUseReward);
   chat.off('Message', tryUseMessage);
@@ -813,8 +886,7 @@ onBeforeUnmount(() => {
   .next-badge {
     --bevel-color: color-mix(in srgb, var(--c5) 65%, black);
     --badge-base-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.2),
-      0 3px 0 var(--bevel-color),
+      inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 3px 0 var(--bevel-color),
       0 5px 8px rgba(0, 0, 0, 0.18);
     background: var(--c5);
     color: var(--c-surface);
@@ -852,7 +924,5 @@ onBeforeUnmount(() => {
     color: var(--c1);
     letter-spacing: 0.02em;
   }
-
 }
-
 </style>

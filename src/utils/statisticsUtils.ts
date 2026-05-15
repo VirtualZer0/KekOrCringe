@@ -1,4 +1,4 @@
-import type { IVideoData } from './YTUtils';
+import type { IVideoData } from './videoSources/types';
 
 export interface StatisticsVideo extends IVideoData {
   percent: number;
@@ -15,10 +15,23 @@ export const createEmptyStatBlock = () => ({
   allVideos: 0,
 });
 
-const normalizeBlock = (block: any) => ({
-  ...createEmptyStatBlock(),
-  ...(block && typeof block === 'object' ? block : {}),
-});
+const ensureVideoPlatform = (
+  v: StatisticsVideo | null | undefined,
+): StatisticsVideo | null => {
+  if (!v) return null;
+  if (!v.platform) v.platform = 'youtube';
+  return v;
+};
+
+const normalizeBlock = (block: any) => {
+  const merged = {
+    ...createEmptyStatBlock(),
+    ...(block && typeof block === 'object' ? block : {}),
+  };
+  merged.mostKekVideo = ensureVideoPlatform(merged.mostKekVideo);
+  merged.mostCringeVideo = ensureVideoPlatform(merged.mostCringeVideo);
+  return merged;
+};
 
 export const getStatistics = (clearCurrent = true) => {
   const raw = localStorage.getItem('statistics');

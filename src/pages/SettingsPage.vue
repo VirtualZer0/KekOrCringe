@@ -90,9 +90,10 @@ import VariantsSettingsPanel from '@/components/VariantsSettingsPanel.vue';
 import OtherSettingsPanel from '@/components/OtherSettingsPanel.vue';
 import PageTitle from '@/components/PageTitle.vue';
 
-import { onMounted, ref } from 'vue';
+import { onBeforeUnmount, onMounted, ref } from 'vue';
 import { getTwitchRewards } from '@/utils/getTwitchRewards';
 import { useStore } from '@/store';
+import { createEmptyStatBlock, getStatistics } from '@/utils/statisticsUtils';
 
 import { useRouter } from 'vue-router';
 import { notify } from '@/utils/notify';
@@ -107,30 +108,43 @@ const variantsSettings = ref(
   JSON.parse(JSON.stringify(store.variantsSettings)),
 );
 
+const isMounted = ref(true);
+
+const clearStaleTwitchData = () => {
+  // Drop cached values from the previous channel so a failed/empty lookup
+  // doesn't leave the new run reading old IDs / rewards / emotes.
+  store.setTwitchId(null);
+  store.setRewards([]);
+  store.setEmotes({ name: 'bttv', value: [] });
+  store.setEmotes({ name: 'ffz', value: [] });
+  store.setEmotes({ name: 'stv', value: [] });
+};
+
 const loadBasicData = async () => {
   try {
     const rewardsReq = await getTwitchRewards(store.channel);
+    if (!isMounted.value) return;
+    const channelData = rewardsReq?.[0]?.data?.community?.channel;
     if (
       Array.isArray(rewardsReq) &&
       rewardsReq.length > 0 &&
-      rewardsReq[0]?.data?.community?.channel?.id != null
+      channelData?.id != null
     ) {
-      store.setTwitchId(rewardsReq[0]?.data?.community?.channel?.id);
-
-      if (
-        rewardsReq[0]?.data?.community?.channel?.communityPointsSettings
-          ?.customRewards?.length > 0
-      ) {
-        store.setRewards(
-          rewardsReq[0].data.community.channel.communityPointsSettings
-            .customRewards,
-        );
-      }
-
+      store.setTwitchId(channelData.id);
+      store.setRewards(
+        channelData.communityPointsSettings?.customRewards ?? [],
+      );
+      store.save();
+    } else {
+      clearStaleTwitchData();
       store.save();
     }
   } catch (e) {
     console.error(e);
+    if (isMounted.value) {
+      clearStaleTwitchData();
+      store.save();
+    }
   }
 };
 
@@ -141,23 +155,25 @@ const loadBttvEmotes = async () => {
         `https://api.betterttv.net/3/cached/users/twitch/${store.twitchId}`,
       )
     ).json();
-    const emotes = [];
-    if (result.channelEmotes) {
+    if (!isMounted.value) return;
+    const emotes: any[] = [];
+    if (Array.isArray(result?.channelEmotes)) {
       emotes.push(...result.channelEmotes);
     }
-
-    if (result.sharedEmotes) {
+    if (Array.isArray(result?.sharedEmotes)) {
       emotes.push(...result.sharedEmotes);
     }
 
     store.setEmotes({
       name: 'bttv',
-      value: emotes.map((emote) => ({
-        name: emote.code.toLowerCase(),
-        url: `https://cdn.betterttv.net/emote/${emote.id}/2x.${
-          emote.imageType ?? 'webp'
-        }`,
-      })),
+      value: emotes
+        .filter((emote: any) => emote?.id && typeof emote?.code === 'string')
+        .map((emote: any) => ({
+          name: emote.code.toLowerCase(),
+          url: `https://cdn.betterttv.net/emote/${emote.id}/2x.${
+            emote.imageType ?? 'webp'
+          }`,
+        })),
     });
   } catch (e) {
     console.error(e);
@@ -170,6 +186,7 @@ const loadStvEmotes = async () => {
     const result = await (
       await fetch(`https://7tv.io/v3/users/twitch/${store.twitchId}`)
     ).json();
+    if (!isMounted.value) return;
 
     const emotes = result?.emote_set?.emotes;
     if (Array.isArray(emotes)) {
@@ -178,7 +195,7 @@ const loadStvEmotes = async () => {
         value: emotes
           .filter((emote: any) => emote?.id && emote?.name)
           .map((emote: any) => ({
-            name: emote.name.toLowerCase(),
+            name: String(emote.name).toLowerCase(),
             url: `https://cdn.7tv.app/emote/${emote.id}/2x.webp`,
           })),
       });
@@ -194,20 +211,35 @@ const loadFfzEmotes = async () => {
     const result = await (
       await fetch(`https://api.frankerfacez.com/v1/room/id/${store.twitchId}`)
     ).json();
+    if (!isMounted.value) return;
 
     const emotes: any[] = [];
-    if (result.sets && Object.values(result.sets).length > 0) {
+    if (result?.sets && typeof result.sets === 'object') {
       Object.values(result.sets).forEach((emoteSet: any) => {
-        emotes.push(...emoteSet.emoticons);
+        if (Array.isArray(emoteSet?.emoticons)) {
+          emotes.push(...emoteSet.emoticons);
+        }
       });
     }
 
     store.setEmotes({
       name: 'ffz',
-      value: emotes.map((emote) => ({
-        name: emote.name.toLowerCase(),
-        url: emote.urls[2],
-      })),
+      value: emotes
+        .filter(
+          (emote: any) =>
+            typeof emote?.name === 'string' &&
+            emote?.urls &&
+            typeof emote.urls === 'object',
+        )
+        .map((emote: any) => ({
+          name: emote.name.toLowerCase(),
+          url:
+            emote.urls[4] ??
+            emote.urls[2] ??
+            emote.urls[1] ??
+            Object.values(emote.urls)[0] ??
+            '',
+        })),
     });
   } catch (e) {
     console.error(e);
@@ -215,23 +247,62 @@ const loadFfzEmotes = async () => {
   }
 };
 
+const RESERVED_VARIANT_NAMES = new Set(['kek', 'cringe', 'neutral']);
+
+const normalizeVariants = (raw: any[]): any[] => {
+  const seen = new Set<string>();
+  // Reserve permanent variant names (kek, cringe) so customs can't shadow them.
+  raw.forEach((v: any) => {
+    if (v?.permanent && typeof v.name === 'string') {
+      seen.add(v.name.toLowerCase());
+    }
+  });
+  return raw.filter((v: any) => {
+    if (!v) return false;
+    if (v.permanent) return true;
+    const trimmed = typeof v.name === 'string' ? v.name.trim() : '';
+    if (!trimmed) return false;
+    const lower = trimmed.toLowerCase();
+    if (RESERVED_VARIANT_NAMES.has(lower)) return false;
+    if (seen.has(lower)) return false;
+    seen.add(lower);
+    v.name = trimmed;
+    return true;
+  });
+};
+
 const saveSettings = () => {
+  variantsSettings.value = normalizeVariants(variantsSettings.value);
   store.setVideoSettings(videoSettings.value);
   store.setVariantsSettings(variantsSettings.value);
+  // Clicking Run = explicit "new run" — clear current stats so this session
+  // starts clean. Reloads inside RunPage no longer wipe these.
+  try {
+    const stats = getStatistics(false);
+    stats.current = createEmptyStatBlock();
+    localStorage['statistics'] = JSON.stringify(stats);
+  } catch (e) {
+    console.error('Failed to reset current statistics', e);
+  }
   store.save();
 };
 
 onMounted(async () => {
   await loadBasicData();
+  if (!isMounted.value) return;
   if (store.twitchId) {
     await Promise.allSettled([
       loadBttvEmotes(),
       loadStvEmotes(),
       loadFfzEmotes(),
     ]);
-
+    if (!isMounted.value) return;
     store.save();
   }
+});
+
+onBeforeUnmount(() => {
+  isMounted.value = false;
 });
 </script>
 

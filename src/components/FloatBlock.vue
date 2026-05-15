@@ -36,6 +36,9 @@ const mx = ref(0);
 const my = ref(0);
 let rafId = 0;
 let spawnTimers: number[] = [];
+let lastSpawnAt = 0;
+
+const SPAWN_COOLDOWN_MS = 600;
 
 const emojiSets: Record<'kek' | 'cringe', readonly string[]> = {
   kek: KEK_EMOJI,
@@ -44,6 +47,11 @@ const emojiSets: Record<'kek' | 'cringe', readonly string[]> = {
 
 const spawn = () => {
   if (!wrapRef.value) return;
+  // Ignore rapid repeated clicks — each spawn schedules 6 timers, and a
+  // determined click-spammer (or accessibility automation) can flood them.
+  const now = performance.now();
+  if (now - lastSpawnAt < SPAWN_COOLDOWN_MS) return;
+  lastSpawnAt = now;
   const set = emojiSets[props.tone];
   for (let i = 0; i < 6; i++) {
     const id = window.setTimeout(() => {
@@ -158,5 +166,4 @@ onBeforeUnmount(() => {
   line-height: 1;
   filter: drop-shadow(0 3px 2px rgba(0, 0, 0, 0.18));
 }
-
 </style>

@@ -22,7 +22,7 @@
         >
           <img
             alt="reward"
-            :src="reward.image ? reward.image.url : reward.defaultImage.url"
+            :src="reward.image?.url ?? reward.defaultImage?.url ?? ''"
             loading="lazy"
           />
           <div>{{ reward.title }}</div>
