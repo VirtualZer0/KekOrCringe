@@ -94,6 +94,7 @@ export default {
   today: 'Сегодня',
   allTime: 'Все время',
   statistics: 'Статистика',
+  statisticsTagline: 'Пора оценить ущерб.',
   noData: 'Нет данных',
   kekWinnerTitle: 'Сегодня вы порадовали нас кучей',
   cringeWinnerTitle: 'Сегодня вы  навалили тонну',

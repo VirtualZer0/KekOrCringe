@@ -1,179 +1,102 @@
 <template>
   <section class="end-page page">
-    <h1>{{ $t('statistics') }}</h1>
+    <div class="content">
+      <PageTitle
+        :title="$t('statistics')"
+        :tagline="$t('statisticsTagline')"
+      />
 
-    <div
-      ref="winnerContainer"
-      class="winner"
-      :class="winner"
-    >
-      <span class="title">{{ $t(`${winner}WinnerTitle`) }}</span>
-      <span
-        class="name"
-        :class="winner"
+      <ChunkyPanel class="winner-panel">
+        <div
+          ref="winnerContainer"
+          class="winner-content"
+        >
+          <span class="title">{{ $t(`${winner}WinnerTitle`) }}</span>
+          <span
+            class="name"
+            :class="winner"
+          >
+            {{ $t(`${winner}WinnerName`) }}
+          </span>
+          <div class="counter">
+            <b class="red">{{ displayCringeCount }}</b>
+            <span class="vs">vs</span>
+            <b class="green">{{ displayKekCount }}</b>
+          </div>
+        </div>
+      </ChunkyPanel>
+
+      <VideoStatPanel
+        tone="kek"
+        :title="$t('mostKek')"
+        icon="⭐"
+        emoji="😆"
+        :items="[
+          {
+            period: 'today',
+            label: $t('today'),
+            video: statistics.current.mostKekVideo,
+          },
+          {
+            period: 'allTime',
+            label: $t('allTime'),
+            video: statistics.allTime.mostKekVideo,
+          },
+        ]"
+        :no-data-label="$t('noData')"
+        :delay="1.6"
+      />
+
+      <VideoStatPanel
+        tone="cringe"
+        :title="$t('mostCringe')"
+        icon="😡"
+        emoji="😡"
+        :items="[
+          {
+            period: 'today',
+            label: $t('today'),
+            video: statistics.current.mostCringeVideo,
+          },
+          {
+            period: 'allTime',
+            label: $t('allTime'),
+            video: statistics.allTime.mostCringeVideo,
+          },
+        ]"
+        :no-data-label="$t('noData')"
+        :delay="1.85"
+      />
+
+      <div
+        :class="['buttons', { 'is-interactive': buttonsInteractive }]"
+        @animationend="buttonsInteractive = true"
       >
-        {{ $t(`${winner}WinnerName`) }}
-      </span>
-      <div class="counter">
-        <b class="red">{{ statistics.current.allCringeCount }}</b>
-        vs
-        <b class="green">{{ statistics.current.allKekCount }}</b>
+        <Button
+          class="action-btn"
+          @click="router.back()"
+        >
+          <ArrowLeft class="size-6" />
+          {{ $t('repeat') }}
+        </Button>
+
+        <Button
+          class="action-btn home-btn"
+          @click="router.push('/')"
+        >
+          <Home class="size-6" />
+          {{ $t('home') }}
+        </Button>
       </div>
-    </div>
-
-    <div class="stat-block kek">
-      <div class="title">{{ $t('mostKek') }}</div>
-      <div class="item">
-        <h2 class="item-title">{{ $t('today') }}</h2>
-        <div
-          v-if="statistics.current.mostKekVideo"
-          class="item-video"
-        >
-          <div class="preview-container">
-            <div class="stats">
-              {{ statistics.current.mostKekVideo?.voteCount }} 😆
-            </div>
-            <a
-              :href="`https://youtu.be/${statistics.current.mostKekVideo?.id}`"
-              target="_blank"
-            >
-              <img
-                class="preview"
-                :src="statistics.current.mostKekVideo?.preview"
-              />
-            </a>
-          </div>
-          <div class="name">
-            {{ statistics.current.mostKekVideo?.title }}
-          </div>
-        </div>
-        <div
-          v-else
-          class="item-nodata"
-        >
-          {{ $t('noData') }}
-        </div>
-      </div>
-
-      <div class="item">
-        <h2 class="item-title">{{ $t('allTime') }}</h2>
-        <div
-          v-if="statistics.allTime.mostKekVideo"
-          class="item-video"
-        >
-          <div class="preview-container">
-            <div class="stats">
-              {{ statistics.allTime.mostKekVideo?.voteCount }} 😆
-            </div>
-            <a
-              :href="`https://youtu.be/${statistics.allTime.mostKekVideo?.id}`"
-              target="_blank"
-            >
-              <img
-                class="preview"
-                :src="statistics.allTime.mostKekVideo?.preview"
-              />
-            </a>
-          </div>
-          <div class="name">
-            {{ statistics.allTime.mostKekVideo?.title }}
-          </div>
-        </div>
-        <div
-          v-else
-          class="item-nodata"
-        >
-          {{ $t('noData') }}
-        </div>
-      </div>
-    </div>
-
-    <div class="stat-block cringe">
-      <div class="title">{{ $t('mostCringe') }}</div>
-      <div class="item">
-        <h2 class="item-title">{{ $t('today') }}</h2>
-        <div
-          v-if="statistics.current.mostCringeVideo"
-          class="item-video"
-        >
-          <div class="preview-container">
-            <div class="stats">
-              {{ statistics.current.mostCringeVideo?.voteCount }} 😡
-            </div>
-            <a
-              :href="`https://youtu.be/${statistics.current.mostCringeVideo?.id}`"
-              target="_blank"
-            >
-              <img
-                class="preview"
-                :src="statistics.current.mostCringeVideo?.preview"
-              />
-            </a>
-          </div>
-          <div class="name">
-            {{ statistics.current.mostCringeVideo?.title }}
-          </div>
-        </div>
-        <div
-          v-else
-          class="item-nodata"
-        >
-          {{ $t('noData') }}
-        </div>
-      </div>
-
-      <div class="item">
-        <h2 class="item-title">{{ $t('allTime') }}</h2>
-        <div
-          v-if="statistics.allTime.mostCringeVideo"
-          class="item-video"
-        >
-          <div class="preview-container">
-            <div class="stats">
-              {{ statistics.allTime.mostCringeVideo?.voteCount }} 😡
-            </div>
-            <a
-              :href="`https://youtu.be/${statistics.allTime.mostCringeVideo?.id}`"
-              target="_blank"
-            >
-              <img
-                class="preview"
-                :src="statistics.allTime.mostCringeVideo?.preview"
-              />
-            </a>
-          </div>
-          <div class="name">
-            {{ statistics.allTime.mostCringeVideo?.title }}
-          </div>
-        </div>
-        <div
-          v-else
-          class="item-nodata"
-        >
-          {{ $t('noData') }}
-        </div>
-      </div>
-    </div>
-
-    <div class="buttons">
-      <Button @click="router.back()">
-        <ArrowLeft />
-        {{ $t('repeat') }}
-      </Button>
-
-      <Button
-        class="bg-amber-500 hover:bg-amber-600 text-white"
-        @click="router.push('/')"
-      >
-        <Home />
-        {{ $t('home') }}
-      </Button>
     </div>
   </section>
 </template>
 <script lang="ts" setup>
 import { Button } from '@/components/ui/button';
+import { ChunkyPanel } from '@/components/ui/chunky-panel';
 import { ArrowLeft, Home } from 'lucide-vue-next';
+import PageTitle from '@/components/PageTitle.vue';
+import VideoStatPanel from '@/components/VideoStatPanel.vue';
 import { getStatistics } from '@/utils/statisticsUtils';
 import { useRouter } from 'vue-router';
 import { onBeforeUnmount, onMounted, ref } from 'vue';
@@ -188,6 +111,7 @@ const score =
   statistics.current.allKekCount - statistics.current.allCringeCount;
 const winner = ref('kek');
 const winnerContainer = ref<HTMLElement>();
+const buttonsInteractive = ref(false);
 const emojis = {
   kek: KEK_EMOJI,
   cringe: CRINGE_EMOJI,
@@ -204,6 +128,39 @@ if (score > 0) {
 
 let particleTimeout: number | null = null;
 let particleInterval: number | null = null;
+
+const displayKekCount = ref(0);
+const displayCringeCount = ref(0);
+let counterStartTimer: number | null = null;
+let kekRafId: number | null = null;
+let cringeRafId: number | null = null;
+
+const easeOutQuart = (t: number) => 1 - Math.pow(1 - t, 4);
+
+const tickTo = (
+  target: number,
+  duration: number,
+  setter: (v: number) => void,
+  storeRaf: (id: number | null) => void,
+) => {
+  const targetNum = Number(target) || 0;
+  if (targetNum <= 0) {
+    setter(0);
+    storeRaf(null);
+    return;
+  }
+  const start = performance.now();
+  const step = (now: number) => {
+    const progress = Math.min((now - start) / duration, 1);
+    setter(Math.round(targetNum * easeOutQuart(progress)));
+    if (progress < 1) {
+      storeRaf(requestAnimationFrame(step));
+    } else {
+      storeRaf(null);
+    }
+  };
+  storeRaf(requestAnimationFrame(step));
+};
 
 onMounted(() => {
   if (winnerContainer.value !== undefined) {
@@ -227,6 +184,22 @@ onMounted(() => {
       }, 300);
     }, 600);
   }
+
+  counterStartTimer = window.setTimeout(() => {
+    counterStartTimer = null;
+    tickTo(
+      statistics.current.allKekCount,
+      1100,
+      (v) => (displayKekCount.value = v),
+      (id) => (kekRafId = id),
+    );
+    tickTo(
+      statistics.current.allCringeCount,
+      1100,
+      (v) => (displayCringeCount.value = v),
+      (id) => (cringeRafId = id),
+    );
+  }, 1500);
 });
 
 onBeforeUnmount(() => {
@@ -238,60 +211,92 @@ onBeforeUnmount(() => {
     clearInterval(particleInterval);
     particleInterval = null;
   }
+  if (counterStartTimer !== null) {
+    clearTimeout(counterStartTimer);
+    counterStartTimer = null;
+  }
+  if (kekRafId !== null) {
+    cancelAnimationFrame(kekRafId);
+    kekRafId = null;
+  }
+  if (cringeRafId !== null) {
+    cancelAnimationFrame(cringeRafId);
+    cringeRafId = null;
+  }
 });
 </script>
 <style scoped>
 .end-page {
-  overflow: hidden;
-  width: 100vw;
-  background: var(--c1);
-  padding-bottom: 32px;
+  min-height: 100vh;
+  padding-bottom: 64px;
+  background:
+    linear-gradient(
+      135deg,
+      var(--c1) 0% 5%,
+      var(--c2) 5% 10%,
+      var(--c4) 10% 15%,
+      transparent 15% 85%,
+      var(--c4) 85% 90%,
+      var(--c5) 90% 95%,
+      var(--c1) 95% 100%
+    ),
+    radial-gradient(circle, rgba(90, 55, 0, 0.07) 1.4px, transparent 1.6px) 0
+      0 / 18px 18px,
+    var(--c3);
+  background-attachment: fixed, scroll, scroll;
 
-  .winner {
+  .winner-panel {
+    width: 65%;
+    max-width: 1120px;
+    margin: 16px auto 56px;
+    animation: panel-rise 0.75s ease backwards;
+    animation-delay: 0.5s;
+  }
+
+  .winner-content {
     position: relative;
     display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 12px;
     flex-direction: column;
-    margin: 0 auto;
-    margin-bottom: 64px;
-    margin-top: 64px;
-    padding-bottom: 12px;
-    padding-top: 12px;
-    font-size: 21px;
-    width: 65%;
-    border-top: 2px solid #fff;
-    border-bottom: 2px solid #fff;
-    animation: winner-appear 0.7s ease backwards;
-    animation-delay: 0.3s;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
 
-    .title,
-    .name,
-    .counter {
+    .title {
+      position: relative;
       z-index: 1;
-    }
-
-    &.kek {
-      border-color: var(--c2);
-    }
-
-    &.cringe {
-      border-color: var(--c5);
-    }
-
-    &.nothing {
-      border-color: var(--c3);
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: 22px;
+      color: var(--c1);
+      text-align: center;
+      letter-spacing: 0.02em;
+      animation: fade-rise 0.45s ease backwards;
+      animation-delay: 0.9s;
     }
 
     .name {
-      &.kek,
-      &.nothing,
-      &.cringe {
-        font-weight: bold;
-        font-size: 52px;
-        text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
-      }
+      position: relative;
+      z-index: 1;
+      display: inline-block;
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: 88px;
+      letter-spacing: 0.02em;
+      line-height: 1;
+      text-transform: uppercase;
+      -webkit-text-stroke: 4px var(--c1);
+      paint-order: stroke fill;
+      text-shadow:
+        0 1px 0 var(--c1),
+        0 2px 0 var(--c1),
+        0 3px 0 var(--c1),
+        0 4px 0 var(--c1),
+        0 5px 0 var(--c1),
+        0 6px 0 var(--c1),
+        0 7px 0 var(--c1),
+        0 14px 10px rgba(0, 0, 0, 0.25);
+      animation: winner-name-pop 0.7s var(--ease-fly) backwards;
+      animation-delay: 1s;
 
       &.kek {
         color: var(--c2);
@@ -306,110 +311,34 @@ onBeforeUnmount(() => {
       }
     }
 
-    .green {
-      color: var(--c2);
-    }
-    .red {
-      color: var(--c5);
-    }
-  }
-
-  .stat-block {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-around;
-    gap: 21px;
-    width: 65%;
-    border-radius: 8px;
-    overflow: hidden;
-    margin: 0 auto;
-    padding-bottom: 21px;
-    margin-bottom: 48px;
-
-    &.kek {
-      .title {
-        background: var(--c3);
-      }
-
-      background: var(--c2);
-    }
-
-    &.cringe {
-      .title {
-        background: var(--c4);
-      }
-
-      background: var(--c5);
-    }
-
-    .title {
-      width: 100%;
-      font-weight: bold;
-      margin-bottom: 0;
-      padding: 8px 0;
-      padding-left: 18px;
-      font-size: 26px;
-      text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.6);
-    }
-
-    .item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 16px;
-    }
-
-    .item-nodata {
-      margin-top: -20px;
-      height: 320px;
-      width: 480px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 52px;
-      transform: rotate(-23deg);
-      color: #fff;
-      opacity: 0.4;
-    }
-
-    .item-title {
-      border-bottom: 3px solid #fff;
-      padding-bottom: 6px;
-      width: 30%;
-      text-align: center;
-    }
-
-    .name {
-      text-align: center;
-      font-weight: bold;
-      max-width: 480px;
-    }
-
-    .preview {
-      border-radius: 8px;
-      max-height: 360px;
-      max-width: 480px;
-      margin-bottom: 10px;
-    }
-
-    .preview-container {
+    .counter {
       position: relative;
-      transition: transform 0.2s ease;
+      z-index: 1;
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+      font-family: var(--font-display);
+      font-weight: 800;
+      font-size: 30px;
+      animation: fade-rise 0.45s ease backwards;
+      animation-delay: 1.4s;
 
-      &:hover {
-        transform: scale(1.1) rotate(4deg);
+      .vs {
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--c1);
+        opacity: 0.55;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
       }
-    }
 
-    .stats {
-      position: absolute;
-      top: -24px;
-      right: -24px;
-      background: var(--c1);
-      padding: 12px;
-      border-radius: 18px;
-      font-size: 21px;
-      font-weight: bold;
+      .green {
+        color: var(--c2);
+      }
+
+      .red {
+        color: var(--c5);
+      }
     }
   }
 
@@ -417,8 +346,61 @@ onBeforeUnmount(() => {
     display: flex;
     flex-wrap: wrap;
     justify-content: center;
-    gap: 16px;
+    gap: 24px;
+    margin-top: 32px;
+    pointer-events: none;
+    animation: rise-in 0.5s ease backwards;
+    animation-delay: 2.6s;
+  }
+
+  .buttons.is-interactive {
+    pointer-events: auto;
+  }
+
+  .action-btn {
+    height: 64px;
+    padding: 0 36px;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border-radius: 18px;
+    gap: 14px;
+    --bevel-color: color-mix(in srgb, var(--c2) 65%, black);
+    box-shadow:
+      inset 0 2px 0 rgba(255, 255, 255, 0.32),
+      0 6px 0 var(--bevel-color),
+      0 13px 20px rgba(0, 0, 0, 0.26);
+    transition:
+      transform 0.12s ease,
+      box-shadow 0.15s ease,
+      background-color 0.15s ease;
+  }
+
+  .action-btn:hover {
+    transform: translateY(-1px);
+    box-shadow:
+      inset 0 2px 0 rgba(255, 255, 255, 0.36),
+      0 7px 0 var(--bevel-color),
+      0 15px 22px rgba(0, 0, 0, 0.28);
+  }
+
+  .action-btn:active {
+    transform: translateY(4px);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.22),
+      0 2px 0 var(--bevel-color),
+      0 5px 10px rgba(0, 0, 0, 0.22);
+  }
+
+  .home-btn {
+    background: var(--c4);
+    color: var(--c-surface);
+    --bevel-color: color-mix(in srgb, var(--c4) 65%, black);
+  }
+
+  .home-btn:hover {
+    background: color-mix(in srgb, var(--c4) 92%, black);
   }
 }
-
 </style>

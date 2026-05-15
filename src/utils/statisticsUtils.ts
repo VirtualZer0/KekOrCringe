@@ -1,6 +1,13 @@
+import type { IVideoData } from './YTUtils';
+
+export interface StatisticsVideo extends IVideoData {
+  percent: number;
+  voteCount: number;
+}
+
 export const createEmptyStatBlock = () => ({
-  mostCringeVideo: null,
-  mostKekVideo: null,
+  mostCringeVideo: null as StatisticsVideo | null,
+  mostKekVideo: null as StatisticsVideo | null,
   mostCringeUser: null,
   mostKekUser: null,
   allCringeCount: 0,

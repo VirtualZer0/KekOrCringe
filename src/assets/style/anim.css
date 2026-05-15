@@ -113,6 +113,67 @@
   }
 }
 
+@keyframes panel-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(56px) scale(0.92);
+  }
+  60% {
+    opacity: 1;
+  }
+  80% {
+    transform: translateY(-10px) scale(1.03);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes winner-name-pop {
+  0% {
+    opacity: 0;
+    transform: translateY(36px) scale(0.55) rotate(-5deg);
+  }
+  55% {
+    opacity: 1;
+    transform: translateY(-10px) scale(1.18) rotate(3deg);
+  }
+  75% {
+    transform: translateY(2px) scale(0.96) rotate(-1.5deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1) rotate(0deg);
+  }
+}
+
+@keyframes badge-pop {
+  0% {
+    opacity: 0;
+    transform: scale(0.2) rotate(-18deg);
+  }
+  55% {
+    opacity: 1;
+    transform: scale(1.2) rotate(10deg);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1) rotate(0deg);
+  }
+}
+
+@keyframes fade-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 @keyframes fly-in-left {
   0% {
     opacity: 0;

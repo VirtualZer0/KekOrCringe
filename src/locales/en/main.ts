@@ -94,6 +94,7 @@ export default {
   today: 'Today',
   allTime: 'All time',
   statistics: 'Statistics',
+  statisticsTagline: 'Time to look at the damage.',
   noData: 'No data',
   kekWinnerTitle: 'Today was a day full of',
   cringeWinnerTitle: 'You piled up a ton of',

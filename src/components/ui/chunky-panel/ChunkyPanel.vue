@@ -19,7 +19,10 @@ const props = withDefaults(
 
 <template>
   <section :class="cn('chunky-panel', props.class)">
-    <header class="chunky-header">
+    <header
+      v-if="icon || title || $slots.header"
+      class="chunky-header"
+    >
       <div
         v-if="icon"
         :class="['chunky-icon', `tone-${tone}`]"
