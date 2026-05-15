@@ -1,14 +1,49 @@
-name: Build and Deploy Vue Application to Github Pages
-on: [push]
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
 jobs:
-  build_deploy_vue:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
-    name: Build and Deploy Vue
     steps:
-    - uses: actions/checkout@v2
-    - id: Build-Deploy-Vue
-      uses: thefrustrateddev/vue-deploy-github-pages@v1.0.0
-      with:
-        username: 'VirtualZer0'
-        reponame: 'KekOrCringe'
-        token: ${{ secrets.GITHUB_TOKEN }} # no need to change this line this is used to create the branch in your application repository
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Set up Node
+        uses: actions/setup-node@v6
+        with:
+          node-version: lts/*
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v6
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v5
+        with:
+          path: ./dist
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v5
