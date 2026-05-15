@@ -9,16 +9,13 @@ const routes: Array<RouteRecordRaw> = [
     path: '/',
     name: 'Main',
     component: MainPage,
-    meta: {
-      color: '#E76F51',
-    },
   },
   {
     path: '/settings',
     name: 'Settings',
     component: SettingsPage,
     meta: {
-      color: '#264653',
+      emoji: '🎬',
     },
   },
   {
@@ -26,7 +23,7 @@ const routes: Array<RouteRecordRaw> = [
     name: 'Run',
     component: RunPage,
     meta: {
-      color: '#E9C46A',
+      emoji: '🎲',
     },
   },
   {
@@ -34,7 +31,7 @@ const routes: Array<RouteRecordRaw> = [
     name: 'End',
     component: EndPage,
     meta: {
-      color: '#264653',
+      emoji: '🏆',
     },
   },
 ];

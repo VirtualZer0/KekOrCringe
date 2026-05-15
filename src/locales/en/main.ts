@@ -5,8 +5,6 @@ export default {
   tagline: 'The internet will decide.',
   twitchUrl: 'Twitch channel link',
   start: 'Start',
-  firstTimeTitle: 'First time?',
-  firstTimeText: "It's a good time to set things up!",
   error: 'Error',
   warning: 'Warning',
   chatConnected: 'Connected to chat',

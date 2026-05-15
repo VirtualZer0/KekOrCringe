@@ -4,13 +4,19 @@
       close-button
       position="top-right"
     />
-    <CircleAnim
-      v-show="outAnim.enable"
-      v-bind="outAnim"
+    <PageWipe
+      v-if="outAnim.enable"
+      :key="`out-${outAnim.key}`"
+      :emoji="outAnim.emoji"
+      phase="enter"
+      :is-top="outAnim.isTop"
     />
-    <CircleAnim
-      v-show="inAnim.enable"
-      v-bind="inAnim"
+    <PageWipe
+      v-if="inAnim.enable"
+      :key="`in-${inAnim.key}`"
+      :emoji="inAnim.emoji"
+      phase="exit"
+      :is-top="inAnim.isTop"
     />
     <router-view />
   </main>
@@ -18,23 +24,24 @@
 <script lang="ts" setup>
 import { nextTick, ref } from 'vue';
 import { useRouter } from 'vue-router';
-import CircleAnim from './components/CircleAnim.vue';
+import PageWipe from './components/PageWipe.vue';
 import { Toaster } from '@/components/ui/sonner';
 
-const ROUTE_ANIM_MS = 210;
-const DEFAULT_ANIM_COLOR = '#e9c46a';
+const ROUTE_ANIM_MS = 340;
 
 const router = useRouter();
 const inAnim = ref({
   enable: false,
-  color: '#264653',
+  emoji: '',
   isTop: false,
+  key: 0,
 });
 
 const outAnim = ref({
   enable: false,
-  color: '#e76f51',
+  emoji: '',
   isTop: true,
+  key: 0,
 });
 
 // Track navigation timers so a fast re-navigation supersedes the previous
@@ -43,15 +50,17 @@ const outAnim = ref({
 let beforeEachTimer: number | null = null;
 let afterEachTimer: number | null = null;
 
-router.beforeEach((to, from, next) => {
+router.beforeEach((to, _from, next) => {
   if (to.name == 'Main') {
     next();
     return;
   }
-  outAnim.value.color = (from.meta.color as string) || DEFAULT_ANIM_COLOR;
+  const toEmoji = (to.meta.emoji as string) || '';
+  outAnim.value.emoji = toEmoji;
   outAnim.value.isTop = true;
+  outAnim.value.key += 1;
   outAnim.value.enable = true;
-  inAnim.value.color = (to.meta.color as string) || DEFAULT_ANIM_COLOR;
+  inAnim.value.emoji = toEmoji;
   if (beforeEachTimer !== null) clearTimeout(beforeEachTimer);
   nextTick(() => {
     beforeEachTimer = window.setTimeout(() => {
@@ -63,16 +72,17 @@ router.beforeEach((to, from, next) => {
 
 router.afterEach((to) => {
   if (to.name == 'Main') return;
-  outAnim.value.isTop = false;
+  // Drop the cover iris and bring the reveal iris to the top so the
+  // contraction plays above the new page's chrome.
+  outAnim.value.enable = false;
+  inAnim.value.isTop = true;
+  inAnim.value.key += 1;
   inAnim.value.enable = true;
-  document.body.style.backgroundColor =
-    (to.meta.color as string) || DEFAULT_ANIM_COLOR;
 
   if (afterEachTimer !== null) clearTimeout(afterEachTimer);
   nextTick(() => {
     afterEachTimer = window.setTimeout(() => {
       afterEachTimer = null;
-      outAnim.value.enable = false;
       inAnim.value.enable = false;
     }, ROUTE_ANIM_MS);
   });

@@ -27,7 +27,6 @@ interface IVariant {
 }
 
 interface IStoreState {
-  firstTime: boolean;
   channel: string;
   twitchId: string | null;
   rewardsCache: any[];
@@ -44,7 +43,6 @@ interface IStoreState {
 
 export const useStore = defineStore('store', {
   state: (): IStoreState => ({
-    firstTime: true,
     channel: '',
     twitchId: null,
     rewardsCache: [],
@@ -89,10 +87,6 @@ export const useStore = defineStore('store', {
   actions: {
     setChannel(channel: string) {
       this.channel = channel;
-    },
-
-    setFirstTime(firstTime: boolean) {
-      this.firstTime = firstTime;
     },
 
     setRewards(rewards: any[]) {

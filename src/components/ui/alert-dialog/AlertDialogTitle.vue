@@ -16,8 +16,22 @@ const delegatedProps = reactiveOmit(props, 'class');
   <AlertDialogTitle
     data-slot="alert-dialog-title"
     v-bind="delegatedProps"
-    :class="cn('text-lg font-semibold', props.class)"
+    :class="cn('chunky-dialog-title', props.class)"
   >
     <slot />
   </AlertDialogTitle>
 </template>
+
+<style scoped>
+.chunky-dialog-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 900;
+  font-size: 28px;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: var(--c1);
+  line-height: 1.1;
+  text-align: center;
+}
+</style>

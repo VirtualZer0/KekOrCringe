@@ -5,8 +5,6 @@ export default {
   tagline: 'Интернет решит.',
   twitchUrl: 'Ссылка на Twitch',
   start: 'Начать',
-  firstTimeTitle: 'Первый раз?',
-  firstTimeText: 'Самое время все настроить!',
   error: 'Ошибка',
   warning: 'Внимание',
   chatConnected: 'Подключено к чату',

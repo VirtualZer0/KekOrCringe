@@ -16,28 +16,13 @@
         {{ $t('start') }}
       </Button>
     </div>
-    <Dialog v-model:open="showFirstTime">
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{{ $t('firstTimeTitle') }}</DialogTitle>
-          <DialogDescription>{{ $t('firstTimeText') }}</DialogDescription>
-        </DialogHeader>
-      </DialogContent>
-    </Dialog>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
 import { useI18n } from 'vue-i18n';
-import { ref, watch } from 'vue';
+import { ref } from 'vue';
 import { notify } from '@/utils/notify';
 import { useStore } from '@/store';
 import { Twitch } from 'lucide-vue-next';
@@ -48,14 +33,6 @@ const { t } = useI18n();
 const store = useStore();
 
 const url = ref(store.channel);
-const showFirstTime = ref(store.firstTime);
-
-watch(showFirstTime, (open) => {
-  if (!open && store.firstTime) {
-    store.setFirstTime(false);
-    store.save();
-  }
-});
 
 const showErr = () => {
   notify.error(t('error'), {

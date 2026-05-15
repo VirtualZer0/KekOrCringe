@@ -37,7 +37,10 @@
   </ChunkyPanel>
 
   <AlertDialog v-model:open="showResetSettings">
-    <AlertDialogContent>
+    <AlertDialogContent tone="c5">
+      <template #icon>
+        <RotateCcw class="size-7 stroke-[2.5]" />
+      </template>
       <AlertDialogHeader>
         <AlertDialogTitle>{{ $t('settings.resetSettings') }}</AlertDialogTitle>
         <AlertDialogDescription>
@@ -54,7 +57,10 @@
   </AlertDialog>
 
   <AlertDialog v-model:open="showClearStats">
-    <AlertDialogContent>
+    <AlertDialogContent tone="c3">
+      <template #icon>
+        <BarChart class="size-7 stroke-[2.5]" />
+      </template>
       <AlertDialogHeader>
         <AlertDialogTitle>{{ $t('settings.clearStatistic') }}</AlertDialogTitle>
         <AlertDialogDescription>
@@ -84,7 +90,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { Upload, Download, BarChart, Trash2 } from 'lucide-vue-next';
+import { Upload, Download, BarChart, Trash2, RotateCcw } from 'lucide-vue-next';
 import { useStore } from '@/store';
 import { useI18n } from 'vue-i18n';
 import { useRouter } from 'vue-router';
@@ -166,7 +172,6 @@ const importSettings = () => {
             const isPlainObject = (v: unknown) =>
               v !== null && typeof v === 'object' && !Array.isArray(v);
             const fieldChecks: Record<string, (v: unknown) => boolean> = {
-              firstTime: (v) => typeof v === 'boolean',
               channel: (v) => typeof v === 'string',
               twitchId: (v) => v === null || typeof v === 'string',
               rewardsCache: (v) => Array.isArray(v),
